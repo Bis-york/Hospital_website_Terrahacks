@@ -103,14 +103,23 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-goog-api-key": "AIzaSyB5P2ggDEPKUE72hwgwFq0M2Y5ICzRLW1M" // Using the provided API key
+                        "X-goog-api-key": "AIzaSyB5P2ggDEPKUE72hwgwFq0M2Y5ICzRLW1M"
                     },
                     body: JSON.stringify({
                         contents: [
                             {
                                 parts: [
                                     {
-                                        text: `I am a doctor and am considering administering the following drugs to a patient. You are a medical professional. Please evaluate the potential for adverse interactions between these drugs and let me know if I can proceed with the treatment: ${drugs.join(", ")}. Respond in the following format: {'severity': 'high|moderate|low', 'description': ['description item 1 about interaction', 'description item 2 about interaction'], 'final_recommendation': 'Your ultimate suggestion on how to achieve the desired effects of these drugs without any adverse reactions or consequences'}. If there are no interactions, respond with {'severity': 'none', 'description': 'No potentially adverse interactions found'}.`
+                                        text: `Check for drug interactions among: ${drugs.join(", ")}.
+                                    Respond only with a valid JSON object, nothing else.
+                                    Format:
+                                    {
+                                    "severity": "high|moderate|low|none",
+                                    "description": ["item1", "item2", "..."],
+                                    "final_recommendation": "summary of what to do"
+                                    }
+
+Drugs: ${drugs.join(", ")}`
                                     }
                                 ]
                             }
@@ -128,7 +137,13 @@
                 if (generatedText) {
                     let interactionData;
                     try {
-                        interactionData = JSON.parse(generatedText.replace(/'/g, '"'));
+                        // Try to find the first valid JSON object in the response
+                        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+                        if (jsonMatch) {
+                            interactionData = JSON.parse(jsonMatch[0].replace(/'/g, '"'));
+                        } else {
+                            throw new Error("No JSON object found in Gemini response.");
+                        }
                     } catch (jsonError) {
                         console.error("JSON parsing error:", jsonError);
                         console.log("Raw Gemini response:", generatedText);
@@ -136,16 +151,19 @@
                         return;
                     }
 
-
                     // Build the HTML output
                     let output = `<h3>Interaction Details</h3>`;
                     output += `<p><strong>Severity:</strong> <span class="severity-${interactionData.severity}">${interactionData.severity.charAt(0).toUpperCase() + interactionData.severity.slice(1)}</span></p>`;
                     output += `<h4>Description:</h4><ul>`;
-                    interactionData.description.forEach(item => {
-                        output += `<li>${item}</li>`;
-                    });
+                    if (Array.isArray(interactionData.description)) {
+                        interactionData.description.forEach(item => {
+                            output += `<li>${item}</li>`;
+                        });
+                    } else {
+                        output += `<li>${interactionData.description}</li>`;
+                    }
                     output += `</ul>`;
-                    output += `<h4>Final Recommendation:</h4><p>${interactionData.final_recommendation}</p>`;
+                    output += `<h4>Final Recommendation:</h4><p>${interactionData.final_recommendation || ''}</p>`;
 
                     resultDiv.innerHTML = output;
                 } else {
