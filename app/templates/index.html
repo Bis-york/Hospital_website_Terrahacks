@@ -74,11 +74,40 @@
         .button:hover {
             background-color: #0056b3;
         }
+        /* New styles for big center buttons */
+        .center-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin: 40px 0 20px 0;
+        }
+        .big-button {
+            font-size: 1.5em;
+            padding: 24px 48px;
+            border-radius: 8px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .big-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Hospital Bed Management System</h1>
+        <h1>MediOrbit</h1>
+        
+        <div class="center-buttons">
+            <button class="big-button" onclick="location.href='/staff'">Hospital Staff</button>
+            <button class="big-button" onclick="location.href='patient.html'">Patient</button>
+
+
+        </div>
         
         <div class="stats-grid" id="stats">
             <!-- Statistics will be loaded here -->
@@ -88,7 +117,6 @@
         <div class="bed-grid" id="beds">
             <!-- Bed cards will be loaded here -->
         </div>
-    </div>
 
     <script>
         // Load statistics
