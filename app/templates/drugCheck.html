@@ -111,13 +111,13 @@
                                 parts: [
                                     {
                                         text: `Check for drug interactions among: ${drugs.join(", ")}.
-                                    Respond only with a valid JSON object, nothing else.
-                                    Format:
-                                    {
-                                    "severity": "high|moderate|low|none",
-                                    "description": ["item1", "item2", "..."],
-                                    "final_recommendation": "summary of what to do"
-                                    }
+                                        Respond only with a valid JSON object, nothing else.
+                                        Format:
+                                        {
+                                        "severity": "high|moderate|low|none",
+                                        "description": ["item1", "item2", "..."],
+                                        "final_recommendation": "summary of what to do"
+                                        }
 
 Drugs: ${drugs.join(", ")}`
                                     }
