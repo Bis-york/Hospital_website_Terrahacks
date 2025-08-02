@@ -71,7 +71,63 @@ class HospitalManagementSystem:
             raise ValueError(f"Hospital with ID {hospital_data['hospital_id']} already exists")
         
         result = self.hospitals_collection.insert_one(hospital)
-        return str(result.inserted_id)
+        hospital_mongo_id = str(result.inserted_id)
+        
+        # Create beds for the hospital if specified
+        if hospital_data.get('total_beds', 0) > 0:
+            self.create_hospital_beds(hospital_data['hospital_id'], hospital_data)
+        
+        # Create basic inventory for the hospital
+        if hospital_data.get('create_basic_inventory', True):
+            self.create_hospital_inventory(hospital_data['hospital_id'])
+        
+        # Create sample staff for the hospital
+        if hospital_data.get('create_sample_staff', True):
+            self.create_hospital_staff(hospital_data['hospital_id'], hospital_data)
+        
+        return hospital_mongo_id
+    
+    def create_hospital_staff(self, hospital_id, hospital_data):
+        """Create sample staff for a hospital"""
+        sample_staff = [
+            {
+                'hospital_id': hospital_id,
+                'staff_id': f'{hospital_id}-DR001',
+                'first_name': 'Dr. Sarah',
+                'last_name': 'Johnson',
+                'email': f'sarah.johnson@{hospital_id.lower()}.com',
+                'password': 'password123',
+                'role': 'doctor',
+                'department': 'Cardiology',
+                'specialization': 'Cardiology'
+            },
+            {
+                'hospital_id': hospital_id,
+                'staff_id': f'{hospital_id}-NUR001',
+                'first_name': 'Maria',
+                'last_name': 'Garcia',
+                'email': f'maria.garcia@{hospital_id.lower()}.com',
+                'password': 'nurse123',
+                'role': 'nurse',
+                'department': 'ICU'
+            },
+            {
+                'hospital_id': hospital_id,
+                'staff_id': f'{hospital_id}-TECH001',
+                'first_name': 'Robert',
+                'last_name': 'Smith',
+                'email': f'robert.smith@{hospital_id.lower()}.com',
+                'password': 'tech123',
+                'role': 'technician',
+                'department': 'Emergency'
+            }
+        ]
+        
+        for staff in sample_staff:
+            try:
+                self.staff_db.create_staff_member(staff)
+            except ValueError:
+                pass  # Staff already exists
     
     def get_all_hospitals(self):
         """Get all hospitals"""
@@ -93,17 +149,11 @@ class HospitalManagementSystem:
         if not hospital:
             raise ValueError(f"Hospital with ID {hospital_id} not found")
         
-        # Get bed statistics
-        bed_stats = self.beds_db.get_bed_statistics()
-        
-        # Get patient statistics
-        patient_stats = self.patients_db.get_patient_statistics()
-        
-        # Get inventory statistics
-        inventory_stats = self.inventory_db.get_inventory_statistics()
-        
-        # Get staff statistics
-        staff_stats = self.staff_db.get_staff_statistics()
+        # Get hospital-specific statistics
+        bed_stats = self.beds_db.get_bed_statistics_by_hospital(hospital_id)
+        patient_stats = self.patients_db.get_patient_statistics_by_hospital(hospital_id)
+        inventory_stats = self.inventory_db.get_inventory_statistics_by_hospital(hospital_id)
+        staff_stats = self.staff_db.get_staff_statistics_by_hospital(hospital_id)
         
         # Get current occupancy rate
         occupancy_rate = (bed_stats['occupied_beds'] / bed_stats['total_beds'] * 100) if bed_stats['total_beds'] > 0 else 0
@@ -111,8 +161,8 @@ class HospitalManagementSystem:
         # Get departments with staff count
         departments_info = []
         for dept in hospital.get('departments', []):
-            dept_staff = self.staff_db.get_staff_by_department(dept)
-            dept_beds = self.beds_db.get_beds_by_department(dept)
+            dept_staff = self.staff_db.get_staff_by_department_and_hospital(dept, hospital_id)
+            dept_beds = self.beds_db.get_beds_by_department_and_hospital(dept, hospital_id)
             departments_info.append({
                 'name': dept,
                 'staff_count': len(dept_staff),
@@ -152,8 +202,8 @@ class HospitalManagementSystem:
         """Get alerts and notifications for a hospital"""
         alerts = []
         
-        # Low stock alerts
-        low_stock_items = self.inventory_db.get_low_stock_items()
+        # Low stock alerts for this hospital
+        low_stock_items = self.inventory_db.get_low_stock_items_by_hospital(hospital_id)
         if low_stock_items:
             alerts.append({
                 'type': 'warning',
@@ -163,8 +213,8 @@ class HospitalManagementSystem:
                 'timestamp': datetime.utcnow()
             })
         
-        # Expiring items alerts
-        expiring_items = self.inventory_db.get_expiring_items()
+        # Expiring items alerts for this hospital
+        expiring_items = self.inventory_db.get_expiring_items_by_hospital(hospital_id)
         if expiring_items:
             alerts.append({
                 'type': 'warning',
@@ -174,8 +224,8 @@ class HospitalManagementSystem:
                 'timestamp': datetime.utcnow()
             })
         
-        # Bed capacity alerts
-        bed_stats = self.beds_db.get_bed_statistics()
+        # Bed capacity alerts for this hospital
+        bed_stats = self.beds_db.get_bed_statistics_by_hospital(hospital_id)
         occupancy_rate = (bed_stats['occupied_beds'] / bed_stats['total_beds'] * 100) if bed_stats['total_beds'] > 0 else 0
         
         if occupancy_rate > 90:
@@ -195,10 +245,11 @@ class HospitalManagementSystem:
                 'timestamp': datetime.utcnow()
             })
         
-        # Staff shortage alerts
-        departments = self.hospitals_collection.find_one({'hospital_id': hospital_id}).get('departments', [])
+        # Staff shortage alerts for this hospital
+        hospital_data = self.hospitals_collection.find_one({'hospital_id': hospital_id})
+        departments = hospital_data.get('departments', []) if hospital_data else []
         for dept in departments:
-            dept_staff = self.staff_db.get_staff_by_department(dept)
+            dept_staff = self.staff_db.get_staff_by_department_and_hospital(dept, hospital_id)
             on_duty_staff = [s for s in dept_staff if s['current_status'] == 'on_duty']
             
             if len(on_duty_staff) < 2:  # Minimum staff threshold
@@ -215,20 +266,161 @@ class HospitalManagementSystem:
     
     def get_hospital_beds(self, hospital_id):
         """Get all beds for a hospital"""
-        # In a multi-hospital system, you might filter by hospital_id
-        return self.beds_db.get_all_beds()
+        return self.beds_db.get_beds_by_hospital(hospital_id)
     
     def get_hospital_patients(self, hospital_id):
         """Get all patients for a hospital"""
-        return self.patients_db.get_all_patients()
+        return self.patients_db.get_patients_by_hospital(hospital_id)
     
     def get_hospital_staff(self, hospital_id):
         """Get all staff for a hospital"""
-        return self.staff_db.get_all_staff()
+        return self.staff_db.get_staff_by_hospital(hospital_id)
     
     def get_hospital_inventory(self, hospital_id):
         """Get all inventory for a hospital"""
-        return self.inventory_db.get_all_inventory()
+        return self.inventory_db.get_inventory_by_hospital(hospital_id)
+    
+    def create_hospital_beds(self, hospital_id, hospital_data):
+        """Create beds for a hospital based on capacity"""
+        departments = hospital_data.get('departments', ['General'])
+        total_beds = hospital_data.get('total_beds', 0)
+        icu_beds = hospital_data.get('icu_beds', 0)
+        emergency_beds = hospital_data.get('emergency_beds', 0)
+        
+        bed_counter = 1
+        
+        # Create ICU beds
+        for i in range(icu_beds):
+            bed_data = {
+                'hospital_id': hospital_id,
+                'bed_number': f'ICU-{i+1:03d}',
+                'room_number': f'ICU-{((i//4)+1):02d}',  # 4 beds per ICU room
+                'department': 'ICU',
+                'bed_type': 'ICU',
+                'floor': 2,
+                'wing': 'Critical Care'
+            }
+            self.beds_db.create_bed(bed_data)
+            bed_counter += 1
+        
+        # Create Emergency beds
+        for i in range(emergency_beds):
+            bed_data = {
+                'hospital_id': hospital_id,
+                'bed_number': f'ER-{i+1:03d}',
+                'room_number': f'ER-{i+1:02d}',
+                'department': 'Emergency',
+                'bed_type': 'emergency',
+                'floor': 1,
+                'wing': 'Emergency'
+            }
+            self.beds_db.create_bed(bed_data)
+            bed_counter += 1
+        
+        # Create General beds distributed among departments
+        general_beds = total_beds - icu_beds - emergency_beds
+        beds_per_dept = general_beds // len(departments) if departments else 0
+        
+        for dept_idx, dept in enumerate(departments):
+            if dept in ['ICU', 'Emergency']:
+                continue  # Skip as already created
+                
+            dept_beds = beds_per_dept
+            if dept_idx == len(departments) - 1:  # Last department gets remaining beds
+                dept_beds = general_beds - (beds_per_dept * (len(departments) - 2))
+            
+            for i in range(dept_beds):
+                bed_data = {
+                    'hospital_id': hospital_id,
+                    'bed_number': f'{dept[:3].upper()}-{i+1:03d}',
+                    'room_number': f'{dept[:3].upper()}-{((i//2)+1):02d}',  # 2 beds per room
+                    'department': dept,
+                    'bed_type': 'standard',
+                    'floor': (dept_idx % 4) + 1,  # Distribute across floors
+                    'wing': f'{dept} Ward'
+                }
+                self.beds_db.create_bed(bed_data)
+    
+    def create_hospital_inventory(self, hospital_id):
+        """Create basic inventory for a hospital"""
+        basic_inventory = [
+            {
+                'hospital_id': hospital_id,
+                'item_id': f'{hospital_id}-MED001',
+                'name': 'Paracetamol 500mg',
+                'category': 'medicine',
+                'subcategory': 'analgesic',
+                'unit_of_measurement': 'tablets',
+                'current_stock': 1000,
+                'minimum_threshold': 200,
+                'unit_price': 0.25
+            },
+            {
+                'hospital_id': hospital_id,
+                'item_id': f'{hospital_id}-PPE001',
+                'name': 'N95 Face Masks',
+                'category': 'PPE',
+                'subcategory': 'respiratory_protection',
+                'unit_of_measurement': 'pieces',
+                'current_stock': 500,
+                'minimum_threshold': 100,
+                'unit_price': 2.50
+            },
+            {
+                'hospital_id': hospital_id,
+                'item_id': f'{hospital_id}-SURG001',
+                'name': 'Surgical Gloves',
+                'category': 'consumable',
+                'subcategory': 'surgical_supplies',
+                'unit_of_measurement': 'pairs',
+                'current_stock': 2000,
+                'minimum_threshold': 500,
+                'unit_price': 0.75
+            }
+        ]
+        
+        for item in basic_inventory:
+            try:
+                self.inventory_db.create_inventory_item(item)
+            except ValueError:
+                pass  # Item already exists
+    
+    def add_staff_to_hospital(self, hospital_id, staff_data):
+        """Add staff member to a specific hospital"""
+        staff_data['hospital_id'] = hospital_id
+        return self.staff_db.create_staff_member(staff_data)
+    
+    def admit_patient_to_hospital(self, hospital_id, patient_data, bed_id=None):
+        """Admit a patient to a specific hospital"""
+        # Add hospital info to patient data
+        patient_data['current_hospital'] = hospital_id
+        patient_data['admission_history'] = patient_data.get('admission_history', [])
+        
+        # Add current admission to history
+        current_admission = {
+            'hospital_id': hospital_id,
+            'admission_date': datetime.utcnow(),
+            'status': 'admitted'
+        }
+        patient_data['admission_history'].append(current_admission)
+        
+        # Create patient record
+        patient_id = self.patients_db.create_patient(patient_data)
+        
+        # Assign bed if provided
+        if bed_id:
+            bed_data = self.beds_db.get_bed_by_id(bed_id)
+            if bed_data and bed_data.get('hospital_id') == hospital_id:
+                self.patients_db.assign_bed_to_patient(patient_data['patient_id'], {
+                    'bed_id': bed_id,
+                    'bed_number': bed_data['bed_number'],
+                    'room_number': bed_data['room_number'],
+                    'department': bed_data['department'],
+                    'hospital_id': hospital_id
+                })
+                self.beds_db.update_bed_status(bed_id, 'occupied', patient_data['patient_id'])
+        
+        return patient_id
     
     def create_department(self, hospital_id, department_data):
         """Create a new department in a hospital"""
