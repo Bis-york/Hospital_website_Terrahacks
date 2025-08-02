@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Interaction Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 420px;
+            margin: 60px auto;
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 16px;
+            background: #0078d4;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 24px;
+            padding: 16px;
+            border-radius: 4px;
+            background: #f0f8ff;
+            min-height: 40px;
+        }
+        .severity-high { color: #d8000c; }
+        .severity-moderate { color: #9f6000; }
+        .severity-low { color: #00529b; }
+    </style>
+</head>
+<body>
+    <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+        <h2>Drug Interaction Checker</h2>
+        <label for="drugs">Enter drug names (comma separated):</label>
+        <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
+        <button onclick="checkInteractions()">Check Interactions</button>
+        <div class="result" id="result"></div>
+    </div>
+    <script>
+        // Example interaction data (for demo purposes)
+        const interactionDB = {
+            "aspirin,ibuprofen": "high",
+            "aspirin,paracetamol": "low",
+            "ibuprofen,paracetamol": "moderate",
+            "warfarin,aspirin": "high",
+            "warfarin,ibuprofen": "high",
+            "warfarin,paracetamol": "moderate"
+        };
+
+        const severityLabels = {
+            high: '<span class="severity-high">High Severity</span>',
+            moderate: '<span class="severity-moderate">Moderate Severity</span>',
+            low: '<span class="severity-low">Low Severity</span>'
+        };
+
+        function checkInteractions() {
+            const input = document.getElementById('drugs').value;
+            const drugs = input.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+            const resultDiv = document.getElementById('result');
+            if (drugs.length < 2) {
+                resultDiv.innerHTML = "Please enter at least two drugs.";
+                return;
+            }
+
+            let severities = [];
+            for (let i = 0; i < drugs.length; i++) {
+                for (let j = i + 1; j < drugs.length; j++) {
+                    const key1 = `${drugs[i]},${drugs[j]}`;
+                    const key2 = `${drugs[j]},${drugs[i]}`;
+                    let severity = interactionDB[key1] || interactionDB[key2];
+                    if (severity) {
+                        severities.push(severity);
+                    }
+                }
+            }
+
+            if (severities.length === 0) {
+                resultDiv.innerHTML = "No known interactions found.";
+                return;
+            }
+
+            // Determine the highest severity
+            let finalSeverity = "low";
+            if (severities.includes("high")) finalSeverity = "high";
+            else if (severities.includes("moderate")) finalSeverity = "moderate";
+
+            resultDiv.innerHTML = `Combination Severity: ${severityLabels[finalSeverity]}`;
+        }
+    </script>
+</body>
+</html>
