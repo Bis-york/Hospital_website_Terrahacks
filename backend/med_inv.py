@@ -19,6 +19,7 @@ class MedicalInventoryDB:
     def create_inventory_item(self, item_data):
         """Create a new inventory item"""
         item = {
+            'hospital_id': item_data.get('hospital_id', 'DEFAULT'),  # Add hospital_id
             'item_id': item_data['item_id'],  # Unique item identifier
             'name': item_data['name'],
             'category': item_data['category'],  # medicine, equipment, consumable, PPE, etc.
@@ -46,10 +47,13 @@ class MedicalInventoryDB:
             'updated_at': datetime.utcnow()
         }
         
-        # Check if item_id already exists
-        existing_item = self.inventory_collection.find_one({'item_id': item_data['item_id']})
+        # Check if item_id already exists in this hospital
+        existing_item = self.inventory_collection.find_one({
+            'item_id': item_data['item_id'],
+            'hospital_id': item_data.get('hospital_id', 'DEFAULT')
+        })
         if existing_item:
-            raise ValueError(f"Item with ID {item_data['item_id']} already exists")
+            raise ValueError(f"Item with ID {item_data['item_id']} already exists in this hospital")
         
         result = self.inventory_collection.insert_one(item)
         return str(result.inserted_id)
@@ -68,12 +72,87 @@ class MedicalInventoryDB:
             item['_id'] = str(item['_id'])
         return item
     
-    def get_items_by_category(self, category):
-        """Get items by category"""
-        items = list(self.inventory_collection.find({'category': category}))
+    def get_inventory_by_hospital(self, hospital_id):
+        """Get all inventory items for a specific hospital"""
+        items = list(self.inventory_collection.find({'hospital_id': hospital_id}))
         for item in items:
             item['_id'] = str(item['_id'])
         return items
+    
+    def get_low_stock_items_by_hospital(self, hospital_id):
+        """Get items with stock below minimum threshold for a specific hospital"""
+        pipeline = [
+            {
+                '$match': {
+                    'hospital_id': hospital_id,
+                    'status': 'active'
+                }
+            },
+            {
+                '$addFields': {
+                    'is_low_stock': {
+                        '$lte': ['$current_stock', '$minimum_threshold']
+                    }
+                }
+            },
+            {
+                '$match': {
+                    'is_low_stock': True
+                }
+            }
+        ]
+        
+        items = list(self.inventory_collection.aggregate(pipeline))
+        for item in items:
+            item['_id'] = str(item['_id'])
+        return items
+    
+    def get_expiring_items_by_hospital(self, hospital_id, days_ahead=30):
+        """Get items expiring within specified days for a specific hospital"""
+        expiry_threshold = datetime.utcnow() + timedelta(days=days_ahead)
+        
+        items = list(self.inventory_collection.find({
+            'hospital_id': hospital_id,
+            'expiry_date': {
+                '$lte': expiry_threshold,
+                '$gte': datetime.utcnow()
+            },
+            'status': 'active'
+        }))
+        
+        for item in items:
+            item['_id'] = str(item['_id'])
+        return items
+    
+    def get_inventory_statistics_by_hospital(self, hospital_id):
+        """Get comprehensive inventory statistics for a specific hospital"""
+        total_items = self.inventory_collection.count_documents({'hospital_id': hospital_id, 'status': 'active'})
+        total_value = list(self.inventory_collection.aggregate([
+            {'$match': {'hospital_id': hospital_id, 'status': 'active'}},
+            {'$group': {'_id': None, 'total': {'$sum': '$total_value'}}}
+        ]))
+        
+        low_stock_count = len(self.get_low_stock_items_by_hospital(hospital_id))
+        expiring_soon_count = len(self.get_expiring_items_by_hospital(hospital_id))
+        
+        # Category breakdown for this hospital
+        category_stats = list(self.inventory_collection.aggregate([
+            {'$match': {'hospital_id': hospital_id, 'status': 'active'}},
+            {'$group': {
+                '_id': '$category',
+                'count': {'$sum': 1},
+                'total_value': {'$sum': '$total_value'},
+                'total_stock': {'$sum': '$current_stock'}
+            }}
+        ]))
+        
+        return {
+            'total_items': total_items,
+            'total_value': total_value[0]['total'] if total_value else 0,
+            'low_stock_items': low_stock_count,
+            'expiring_soon': expiring_soon_count,
+            'category_breakdown': category_stats
+        }
     
     def get_low_stock_items(self):
         """Get items with stock below minimum threshold"""

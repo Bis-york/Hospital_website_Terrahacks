@@ -18,12 +18,15 @@ class HospitalBedsDB:
     def create_bed(self, bed_data):
         """Create a new hospital bed"""
         bed = {
+            'hospital_id': bed_data.get('hospital_id', 'DEFAULT'),  # Add hospital_id
             'bed_number': bed_data['bed_number'],
             'room_number': bed_data['room_number'],
             'department': bed_data['department'],
             'bed_type': bed_data.get('bed_type', 'standard'),  # standard, ICU, emergency
             'status': bed_data.get('status', 'available'),  # available, occupied, maintenance
             'patient_id': bed_data.get('patient_id', None),
+            'floor': bed_data.get('floor', 1),
+            'wing': bed_data.get('wing', 'Main'),
             'created_at': datetime.utcnow(),
             'updated_at': datetime.utcnow()
         }
@@ -53,12 +56,45 @@ class HospitalBedsDB:
             bed['_id'] = str(bed['_id'])
         return beds
     
-    def get_beds_by_department(self, department):
-        """Get beds by department"""
-        beds = list(self.beds_collection.find({'department': department}))
+    def get_beds_by_hospital(self, hospital_id):
+        """Get beds by hospital"""
+        beds = list(self.beds_collection.find({'hospital_id': hospital_id}))
         for bed in beds:
             bed['_id'] = str(bed['_id'])
         return beds
+    
+    def get_beds_by_department_and_hospital(self, department, hospital_id):
+        """Get beds by department and hospital"""
+        beds = list(self.beds_collection.find({'department': department, 'hospital_id': hospital_id}))
+        for bed in beds:
+            bed['_id'] = str(bed['_id'])
+        return beds
+    
+    def get_bed_statistics_by_hospital(self, hospital_id):
+        """Get statistics about bed usage for a specific hospital"""
+        total_beds = self.beds_collection.count_documents({'hospital_id': hospital_id})
+        available_beds = self.beds_collection.count_documents({'hospital_id': hospital_id, 'status': 'available'})
+        occupied_beds = self.beds_collection.count_documents({'hospital_id': hospital_id, 'status': 'occupied'})
+        maintenance_beds = self.beds_collection.count_documents({'hospital_id': hospital_id, 'status': 'maintenance'})
+        
+        # Get beds by department for this hospital
+        departments = self.beds_collection.distinct('department', {'hospital_id': hospital_id})
+        department_stats = {}
+        for dept in departments:
+            department_stats[dept] = {
+                'total': self.beds_collection.count_documents({'department': dept, 'hospital_id': hospital_id}),
+                'available': self.beds_collection.count_documents({'department': dept, 'hospital_id': hospital_id, 'status': 'available'}),
+                'occupied': self.beds_collection.count_documents({'department': dept, 'hospital_id': hospital_id, 'status': 'occupied'})
+            }
+        
+        return {
+            'total_beds': total_beds,
+            'available_beds': available_beds,
+            'occupied_beds': occupied_beds,
+            'maintenance_beds': maintenance_beds,
+            'occupancy_rate': round((occupied_beds / total_beds * 100), 2) if total_beds > 0 else 0,
+            'department_stats': department_stats
+        }
     
     def update_bed_status(self, bed_id, status, patient_id=None):
         """Update bed status and assign/unassign patient"""

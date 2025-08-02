@@ -25,6 +25,7 @@ class StaffManagementDB:
     def create_staff_member(self, staff_data):
         """Create a new staff member"""
         staff = {
+            'hospital_id': staff_data.get('hospital_id', 'DEFAULT'),  # Add hospital_id
             'staff_id': staff_data['staff_id'],  # Unique staff identifier
             'employee_number': staff_data.get('employee_number', ''),
             'first_name': staff_data['first_name'],
@@ -59,15 +60,20 @@ class StaffManagementDB:
             'updated_at': datetime.utcnow()
         }
         
-        # Check if staff_id or email already exists
+        # Check if staff_id or email already exists in this hospital
         existing_staff = self.staff_collection.find_one({
-            '$or': [
-                {'staff_id': staff_data['staff_id']},
-                {'email': staff_data['email']}
+            '$and': [
+                {'hospital_id': staff_data.get('hospital_id', 'DEFAULT')},
+                {
+                    '$or': [
+                        {'staff_id': staff_data['staff_id']},
+                        {'email': staff_data['email']}
+                    ]
+                }
             ]
         })
         if existing_staff:
-            raise ValueError(f"Staff member with ID {staff_data['staff_id']} or email {staff_data['email']} already exists")
+            raise ValueError(f"Staff member with ID {staff_data['staff_id']} or email {staff_data['email']} already exists in this hospital")
         
         result = self.staff_collection.insert_one(staff)
         return str(result.inserted_id)
@@ -258,12 +264,62 @@ class StaffManagementDB:
             staff['_id'] = str(staff['_id'])
         return staff
     
-    def get_staff_by_department(self, department):
-        """Get staff members by department"""
-        staff_list = list(self.staff_collection.find({'department': department}, {'password_hash': 0}))
+    def get_staff_by_hospital(self, hospital_id):
+        """Get staff members by hospital"""
+        staff_list = list(self.staff_collection.find({'hospital_id': hospital_id}, {'password_hash': 0}))
         for staff in staff_list:
             staff['_id'] = str(staff['_id'])
         return staff_list
+    
+    def get_staff_by_department_and_hospital(self, department, hospital_id):
+        """Get staff members by department and hospital"""
+        staff_list = list(self.staff_collection.find({
+            'department': department,
+            'hospital_id': hospital_id
+        }, {'password_hash': 0}))
+        for staff in staff_list:
+            staff['_id'] = str(staff['_id'])
+        return staff_list
+    
+    def get_staff_statistics_by_hospital(self, hospital_id):
+        """Get comprehensive staff statistics for a specific hospital"""
+        total_staff = self.staff_collection.count_documents({'hospital_id': hospital_id, 'is_active': True})
+        on_duty = self.staff_collection.count_documents({'hospital_id': hospital_id, 'current_status': 'on_duty'})
+        on_break = self.staff_collection.count_documents({
+            'hospital_id': hospital_id,
+            'current_status': {'$in': ['break', 'lunch']}
+        })
+        on_vacation = self.staff_collection.count_documents({'hospital_id': hospital_id, 'current_status': 'vacation'})
+        sick_leave = self.staff_collection.count_documents({'hospital_id': hospital_id, 'current_status': 'sick_leave'})
+        
+        # Department breakdown for this hospital
+        department_stats = list(self.staff_collection.aggregate([
+            {'$match': {'hospital_id': hospital_id, 'is_active': True}},
+            {'$group': {
+                '_id': '$department',
+                'total': {'$sum': 1},
+                'on_duty': {'$sum': {'$cond': [{'$eq': ['$current_status', 'on_duty']}, 1, 0]}}
+            }}
+        ]))
+        
+        # Role breakdown for this hospital
+        role_stats = list(self.staff_collection.aggregate([
+            {'$match': {'hospital_id': hospital_id, 'is_active': True}},
+            {'$group': {
+                '_id': '$role',
+                'count': {'$sum': 1}
+            }}
+        ]))
+        
+        return {
+            'total_staff': total_staff,
+            'on_duty': on_duty,
+            'on_break': on_break,
+            'on_vacation': on_vacation,
+            'sick_leave': sick_leave,
+            'department_breakdown': department_stats,
+            'role_breakdown': role_stats
+        }
     
     def get_staff_by_role(self, role):
         """Get staff members by role"""
