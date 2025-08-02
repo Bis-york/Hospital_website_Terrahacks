@@ -67,6 +67,18 @@
         .severity-low {
             color: #00529b;
         }
+
+        .disclaimer {
+            margin-top: 32px;
+            padding: 12px 16px;
+            background: #fffbe6;
+            border-left: 4px solid #ffc107;
+            border-radius: 6px;
+            color: #856404;
+            font-size: 0.95em;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -77,6 +89,13 @@
         <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
         <button onclick="checkInteractions()">Check Interactions</button>
         <div class="result" id="result"></div>
+        <div class="disclaimer">
+            <strong>Disclaimer:</strong><br>
+            This tool is for informational and educational purposes only.
+            It does not constitute medical advice, diagnosis, or treatment. Always 
+            consult a qualified healthcare professional or pharmacist before making any 
+            decisions about medications.
+        </div>
     </div>
     <script>
         // Example interaction data (for demo purposes)
