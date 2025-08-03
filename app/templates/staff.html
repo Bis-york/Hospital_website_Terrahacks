@@ -6,39 +6,42 @@
   <title>Staff Management System</title>
   <style>
     :root {
-      --primary: #6a9ac4;      /* Calm Blue */
-      --accent: #9ed5cb;       /* Mint Green */
-      --highlight: #b8a4d4;    /* Soft Purple */
-      --bg-light: #f0f6f6;     /* Light soothing background */
+      --primary: #6a9ac4;
+      --accent: #9ed5cb;
+      --highlight: #b8a4d4;
+      --bg-light: #f0f6f6;
       --card-bg: #ffffff;
       --text-dark: #333;
-      --text-muted: #555;
+      --text-muted: #666;
+      --success: #4CAF50;
+      --warning: #FF9800;
+      --danger: #F44336;
+      --info: #2196F3;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 20px;
-      background-color: var(--bg-light);
+      padding: 0;
+      background: linear-gradient(135deg, var(--bg-light), #e8f4f8);
+      min-height: 100vh;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
-      background-color: var(--card-bg);
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(106, 154, 196, 0.15);
+      padding: 20px;
     }
 
     h1 {
       text-align: center;
       color: var(--primary);
-      background: linear-gradient(to right, var(--accent), var(--highlight));
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      font-size: 2.5em;
-      margin-bottom: 20px;
+      font-size: 2.8em;
+      margin-bottom: 30px;
+      font-weight: 700;
     }
 
     /* Sidebar Styles */
@@ -53,6 +56,7 @@
       transition: left 0.3s ease;
       z-index: 1000;
       overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     }
 
     .sidebar.open {
@@ -62,33 +66,39 @@
     .sidebar-header {
       padding: 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
     }
 
     .sidebar-header h2 {
       margin: 0;
       font-size: 1.5em;
+      font-weight: 600;
     }
 
     .sidebar-nav {
       padding: 0;
       list-style: none;
-      margin: 0;
+      margin: 20px 0;
     }
 
     .sidebar-nav li {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 5px 0;
     }
 
     .sidebar-nav a {
-      display: block;
+      display: flex;
+      align-items: center;
       padding: 15px 20px;
       color: white;
       text-decoration: none;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
+      border-radius: 0 25px 25px 0;
+      margin-right: 10px;
     }
 
     .sidebar-nav a:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
     }
 
     .sidebar-nav a.active {
@@ -97,27 +107,31 @@
     }
 
     .sidebar-nav a i {
-      margin-right: 10px;
+      margin-right: 12px;
       width: 20px;
       text-align: center;
+      font-size: 1.1em;
     }
 
     .menu-btn {
       position: fixed;
       top: 20px;
       left: 20px;
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
       border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
+      padding: 12px 16px;
+      border-radius: 10px;
       cursor: pointer;
       z-index: 1001;
       font-size: 18px;
+      box-shadow: 0 4px 12px rgba(106, 154, 196, 0.3);
+      transition: all 0.3s ease;
     }
 
     .menu-btn:hover {
       background: var(--accent);
+      transform: translateY(-2px);
     }
 
     .overlay {
@@ -141,6 +155,546 @@
 
     .main-content.shifted {
       margin-left: 250px;
+    }
+
+    /* Staff Search Section */
+    .staff-search-section {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 25px rgba(106, 154, 196, 0.2);
+    }
+
+    .staff-search-section h2 {
+      color: white;
+      margin: 0 0 20px 0;
+      font-size: 1.8em;
+    }
+
+    .search-container {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background: white;
+      color: var(--text-dark);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      box-shadow: 0 6px 20px rgba(106, 154, 196, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .search-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+
+    .search-dropdown.show {
+      display: block;
+    }
+
+    .search-item {
+      padding: 15px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.3s ease;
+    }
+
+    .search-item:hover {
+      background-color: var(--bg-light);
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .staff-name {
+      font-weight: bold;
+      color: var(--text-dark);
+    }
+
+    .staff-info {
+      font-size: 0.9em;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+
+    /* Statistics Cards */
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      text-align: center;
+      transition: all 0.3s ease;
+      border-left: 5px solid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+      border-radius: 50%;
+      transform: translate(30px, -30px);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    }
+
+    .stat-card.total { border-left-color: var(--info); }
+    .stat-card.on-duty { border-left-color: var(--success); }
+    .stat-card.off-duty { border-left-color: var(--warning); }
+    .stat-card.on-leave { border-left-color: var(--danger); }
+
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-card.total .stat-number { color: var(--info); }
+    .stat-card.on-duty .stat-number { color: var(--success); }
+    .stat-card.off-duty .stat-number { color: var(--warning); }
+    .stat-card.on-leave .stat-number { color: var(--danger); }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Department Cards */
+    .departments-section {
+      margin-bottom: 30px;
+    }
+
+    .departments-section h2 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 1.8em;
+    }
+
+    .department-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .department-card {
+      background: linear-gradient(135deg, white, var(--bg-light));
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .department-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(106, 154, 196, 0.15);
+    }
+
+    .department-card h3 {
+      color: var(--primary);
+      margin: 0 0 10px 0;
+      font-size: 1.2em;
+    }
+
+    .department-count {
+      font-size: 2em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    .action-btn.success {
+      background: linear-gradient(135deg, var(--success), #66BB6A);
+      color: white;
+    }
+
+    .action-btn.info {
+      background: linear-gradient(135deg, var(--info), #42A5F5);
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    /* Staff Details Section */
+    .staff-details-section {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .staff-details-section.show {
+      display: block;
+    }
+
+    .staff-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--bg-light);
+    }
+
+    .staff-title {
+      color: var(--primary);
+      font-size: 1.8em;
+      margin: 0;
+    }
+
+    .staff-status {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .status-on-duty {
+      background: #E8F5E8;
+      color: #2E7D32;
+    }
+
+    .status-off-duty {
+      background: #FFF3E0;
+      color: #E65100;
+    }
+
+    .status-on-leave {
+      background: #FFEBEE;
+      color: #C62828;
+    }
+
+    .status-active {
+      background: #E3F2FD;
+      color: #1565C0;
+    }
+
+    /* Staff Info Grid */
+    .staff-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .info-card {
+      background: var(--bg-light);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .info-card h4 {
+      color: var(--primary);
+      margin: 0 0 15px 0;
+      font-size: 1.2em;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      color: var(--text-dark);
+      font-weight: 500;
+    }
+
+    /* Schedule Section */
+    .schedule-section {
+      margin-top: 30px;
+    }
+
+    .schedule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .schedule-day {
+      background: white;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .schedule-day:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .day-name {
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .day-shift {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+
+    .day-shift.on-duty {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .day-shift.off-duty {
+      color: var(--warning);
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 3% auto;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal h3 {
+      color: var(--primary);
+      margin-bottom: 25px;
+      font-size: 1.8em;
+      text-align: center;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 12px 16px;
+      border: 2px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(106, 154, 196, 0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(106, 154, 196, 0.3);
+    }
+
+    .btn-secondary {
+      background: #E0E0E0;
+      color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+      background: #BDBDBD;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #66BB6A);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #EF5350);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .staff-info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-actions {
+        justify-content: center;
+      }
+      
+      .schedule-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -170,164 +724,263 @@
   <!-- Main Content -->
   <div class="main-content" id="main-content">
   <div class="container">
-    <h1>👨‍⚕️ Staff Management</h1>
+    <h1>👨‍⚕️ Staff Management System</h1>
     
-    <div class="top-info">
-      <p class="p1">Hospital Staff Management System</p>
-      <p class="p2">Manage staff directory, schedules, and authentication</p>
-      <p class="p3">Complete staff registry with role-based access control</p>
-    </div>
-
-    <div class="dashboard-section">
-      <h2>Staff Overview</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="total-staff">0</div>
-          <div class="stat-label">Total Staff</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="active-staff">0</div>
-          <div class="stat-label">Active Today</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="on-duty-staff">0</div>
-          <div class="stat-label">On Duty</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="off-duty-staff">0</div>
-          <div class="stat-label">Off Duty</div>
+    <!-- Staff Search Section -->
+    <div class="staff-search-section">
+      <h2>🔍 Search Staff Members</h2>
+      <div class="search-container">
+        <input type="text" class="search-input" id="staff-search-input" placeholder="Search staff by name, ID, role, or department...">
+        <div class="search-dropdown" id="search-dropdown">
+          <!-- Search results will appear here -->
         </div>
       </div>
     </div>
 
+    <!-- Statistics Section -->
+    <div class="stats-section">
+      <div class="stat-card total">
+        <div class="stat-number" id="total-staff">0</div>
+        <div class="stat-label">Total Staff</div>
+      </div>
+      <div class="stat-card on-duty">
+        <div class="stat-number" id="on-duty-staff">0</div>
+        <div class="stat-label">Currently On Duty</div>
+      </div>
+      <div class="stat-card off-duty">
+        <div class="stat-number" id="off-duty-staff">0</div>
+        <div class="stat-label">Off Duty</div>
+      </div>
+      <div class="stat-card on-leave">
+        <div class="stat-number" id="on-leave-staff">0</div>
+        <div class="stat-label">On Leave</div>
+      </div>
+    </div>
+
+    <!-- Department Overview -->
     <div class="departments-section">
-      <h2>Department Breakdown</h2>
+      <h2>📊 Department Overview</h2>
       <div class="department-grid">
         <div class="department-card" data-department="emergency">
-          <h3>Emergency</h3>
+          <h3>🚨 Emergency</h3>
           <div class="department-count" id="emergency-count">0</div>
         </div>
         <div class="department-card" data-department="icu">
-          <h3>ICU</h3>
+          <h3>🏥 ICU</h3>
           <div class="department-count" id="icu-count">0</div>
         </div>
         <div class="department-card" data-department="general">
-          <h3>General</h3>
+          <h3>🏨 General</h3>
           <div class="department-count" id="general-count">0</div>
         </div>
         <div class="department-card" data-department="surgery">
-          <h3>Surgery</h3>
+          <h3>⚕️ Surgery</h3>
           <div class="department-count" id="surgery-count">0</div>
+        </div>
+        <div class="department-card" data-department="administration">
+          <h3>📋 Administration</h3>
+          <div class="department-count" id="administration-count">0</div>
         </div>
       </div>
     </div>
 
-    <div class="actions-section">
-      <h2>Staff Management Actions</h2>
-      <button class="action-btn" id="add-staff-btn">Add New Staff</button>
-      <button class="action-btn" id="staff-login-btn">Staff Login</button>
-      <button class="action-btn" id="update-schedules-btn">Update Schedules</button>
-      <button class="action-btn" id="refresh-staff-btn">Refresh List</button>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button class="action-btn primary" id="add-staff-btn">
+        ➕ Add New Staff
+      </button>
+      <button class="action-btn success" id="staff-login-btn">
+        🔐 Staff Login
+      </button>
+      <button class="action-btn info" id="update-schedules-btn">
+        📅 Manage Schedules
+      </button>
+      <button class="action-btn primary" id="export-staff-btn" style="display: none;">
+        📄 Export Report
+      </button>
     </div>
 
-    <div class="staff-section">
-      <h2>Staff Directory</h2>
-      <div class="search-controls">
-        <input type="text" id="staff-search" placeholder="Search staff by name, ID, or role...">
-        <select id="role-filter">
-          <option value="">All Roles</option>
-          <option value="doctor">Doctor</option>
-          <option value="nurse">Nurse</option>
-          <option value="technician">Technician</option>
-          <option value="administrator">Administrator</option>
-          <option value="support">Support Staff</option>
-        </select>
-        <select id="department-filter">
-          <option value="">All Departments</option>
-          <option value="emergency">Emergency</option>
-          <option value="icu">ICU</option>
-          <option value="general">General</option>
-          <option value="surgery">Surgery</option>
-          <option value="administration">Administration</option>
-        </select>
-        <select id="status-filter">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="on_duty">On Duty</option>
-          <option value="off_duty">Off Duty</option>
-          <option value="on_leave">On Leave</option>
-        </select>
+    <!-- Staff Details Section -->
+    <div class="staff-details-section" id="staff-details-section">
+      <div class="staff-header">
+        <h3 class="staff-title" id="staff-title">Select a staff member to view details</h3>
+        <span class="staff-status" id="staff-status-badge"></span>
       </div>
-      
-      <div class="staff-grid" id="staff-grid">
-        <!-- Staff cards will be loaded here dynamically -->
+
+      <div class="staff-info-grid" id="staff-info-grid">
+        <!-- Staff information cards will be generated here -->
+      </div>
+
+      <!-- Schedule Section -->
+      <div class="schedule-section" id="schedule-section">
+        <div class="schedule-header">
+          <h4>📅 Weekly Schedule</h4>
+          <button class="btn btn-primary" id="edit-schedule-btn">Edit Schedule</button>
+        </div>
+        <div class="schedule-grid" id="schedule-grid">
+          <!-- Weekly schedule will be displayed here -->
+        </div>
+      </div>
+
+      <!-- Staff Action Buttons -->
+      <div class="form-actions" style="margin-top: 30px;">
+        <button class="btn btn-primary" id="edit-staff-btn">✏️ Edit Staff</button>
+        <button class="btn btn-success" id="change-status-btn">🔄 Change Status</button>
+        <button class="btn btn-danger" id="deactivate-staff-btn">❌ Deactivate</button>
       </div>
     </div>
 
     <!-- Modal for Add Staff -->
     <div class="modal" id="add-staff-modal">
       <div class="modal-content">
-        <h3>Add New Staff Member</h3>
+        <h3>➕ Add New Staff Member</h3>
         <form id="add-staff-form">
-          <div class="form-group">
-            <label for="staff-id">Staff ID:</label>
-            <input type="text" id="staff-id" required>
-          </div>
-          <div class="form-group">
-            <label for="first-name">First Name:</label>
-            <input type="text" id="first-name" required>
-          </div>
-          <div class="form-group">
-            <label for="last-name">Last Name:</label>
-            <input type="text" id="last-name" required>
-          </div>
-          <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" required>
-          </div>
-          <div class="form-group">
-            <label for="phone">Phone:</label>
-            <input type="tel" id="phone" required>
-          </div>
-          <div class="form-group">
-            <label for="role">Role:</label>
-            <select id="role" required>
-              <option value="">Select Role</option>
-              <option value="doctor">Doctor</option>
-              <option value="nurse">Nurse</option>
-              <option value="technician">Technician</option>
-              <option value="administrator">Administrator</option>
-              <option value="support">Support Staff</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="department">Department:</label>
-            <select id="department" required>
-              <option value="">Select Department</option>
-              <option value="emergency">Emergency</option>
-              <option value="icu">ICU</option>
-              <option value="general">General</option>
-              <option value="surgery">Surgery</option>
-              <option value="administration">Administration</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="shift">Shift:</label>
-            <select id="shift" required>
-              <option value="">Select Shift</option>
-              <option value="morning">Morning (6AM - 2PM)</option>
-              <option value="afternoon">Afternoon (2PM - 10PM)</option>
-              <option value="night">Night (10PM - 6AM)</option>
-              <option value="on_call">On Call</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" required>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="staff-id">Staff ID:</label>
+              <input type="text" id="staff-id" required placeholder="STF001">
+            </div>
+            <div class="form-group">
+              <label for="first-name">First Name:</label>
+              <input type="text" id="first-name" required placeholder="John">
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name:</label>
+              <input type="text" id="last-name" required placeholder="Smith">
+            </div>
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" id="email" required placeholder="john.smith@hospital.com">
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone:</label>
+              <input type="tel" id="phone" required placeholder="555-0123">
+            </div>
+            <div class="form-group">
+              <label for="role">Role:</label>
+              <select id="role" required>
+                <option value="">Select Role</option>
+                <option value="doctor">Doctor</option>
+                <option value="nurse">Nurse</option>
+                <option value="technician">Medical Technician</option>
+                <option value="administrator">Administrator</option>
+                <option value="support">Support Staff</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="department">Department:</label>
+              <select id="department" required>
+                <option value="">Select Department</option>
+                <option value="emergency">Emergency</option>
+                <option value="icu">ICU</option>
+                <option value="general">General</option>
+                <option value="surgery">Surgery</option>
+                <option value="administration">Administration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="shift">Primary Shift:</label>
+              <select id="shift" required>
+                <option value="">Select Shift</option>
+                <option value="morning">Morning (6AM - 2PM)</option>
+                <option value="afternoon">Afternoon (2PM - 10PM)</option>
+                <option value="night">Night (10PM - 6AM)</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="hire-date">Hire Date:</label>
+              <input type="date" id="hire-date" required>
+            </div>
+            <div class="form-group">
+              <label for="salary">Annual Salary:</label>
+              <input type="number" id="salary" placeholder="65000">
+            </div>
+            <div class="form-group full-width">
+              <label for="qualifications">Qualifications:</label>
+              <textarea id="qualifications" rows="3" placeholder="Medical degrees, certifications, specializations..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="password">Password:</label>
+              <input type="password" id="password" required placeholder="Minimum 8 characters">
+            </div>
           </div>
           <div class="form-actions">
-            <button type="submit">Add Staff Member</button>
-            <button type="button" id="cancel-add-staff">Cancel</button>
+            <button type="submit" class="btn btn-success">Add Staff Member</button>
+            <button type="button" class="btn btn-secondary" id="cancel-add-staff">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Edit Staff -->
+    <div class="modal" id="edit-staff-modal">
+      <div class="modal-content">
+        <h3>✏️ Edit Staff Information</h3>
+        <form id="edit-staff-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="edit-staff-id">Staff ID:</label>
+              <input type="text" id="edit-staff-id" readonly>
+            </div>
+            <div class="form-group">
+              <label for="edit-first-name">First Name:</label>
+              <input type="text" id="edit-first-name" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-last-name">Last Name:</label>
+              <input type="text" id="edit-last-name" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-email">Email:</label>
+              <input type="email" id="edit-email" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-phone">Phone:</label>
+              <input type="tel" id="edit-phone" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-role">Role:</label>
+              <select id="edit-role" required>
+                <option value="doctor">Doctor</option>
+                <option value="nurse">Nurse</option>
+                <option value="technician">Medical Technician</option>
+                <option value="administrator">Administrator</option>
+                <option value="support">Support Staff</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-department">Department:</label>
+              <select id="edit-department" required>
+                <option value="emergency">Emergency</option>
+                <option value="icu">ICU</option>
+                <option value="general">General</option>
+                <option value="surgery">Surgery</option>
+                <option value="administration">Administration</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-status">Status:</label>
+              <select id="edit-status">
+                <option value="on_duty">On Duty</option>
+                <option value="off_duty">Off Duty</option>
+                <option value="on_leave">On Leave</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-salary">Annual Salary:</label>
+              <input type="number" id="edit-salary">
+            </div>
+            <div class="form-group full-width">
+              <label for="edit-qualifications">Qualifications:</label>
+              <textarea id="edit-qualifications" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Update Staff</button>
+            <button type="button" class="btn btn-secondary" id="cancel-edit-staff">Cancel</button>
           </div>
         </form>
       </div>
@@ -336,54 +989,158 @@
     <!-- Modal for Staff Login -->
     <div class="modal" id="login-modal">
       <div class="modal-content">
-        <h3>Staff Login</h3>
+        <h3>🔐 Staff Login</h3>
         <form id="login-form">
-          <div class="form-group">
-            <label for="login-email">Email:</label>
-            <input type="email" id="login-email" required>
-          </div>
-          <div class="form-group">
-            <label for="login-password">Password:</label>
-            <input type="password" id="login-password" required>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="login-email">Email:</label>
+              <input type="email" id="login-email" required placeholder="your.email@hospital.com">
+            </div>
+            <div class="form-group full-width">
+              <label for="login-password">Password:</label>
+              <input type="password" id="login-password" required placeholder="Your password">
+            </div>
           </div>
           <div class="form-actions">
-            <button type="submit">Login</button>
-            <button type="button" id="cancel-login">Cancel</button>
+            <button type="submit" class="btn btn-success">Login</button>
+            <button type="button" class="btn btn-secondary" id="cancel-login">Cancel</button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Modal for Update Staff Status -->
-    <div class="modal" id="status-modal">
+    <!-- Modal for Schedule Management -->
+    <div class="modal" id="schedule-modal">
       <div class="modal-content">
-        <h3>Update Staff Status</h3>
-        <form id="status-form">
-          <div class="form-group">
-            <label for="status-staff-select">Select Staff Member:</label>
-            <select id="status-staff-select" required>
-              <option value="">Select Staff Member</option>
-              <!-- Staff members will be loaded here -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="new-status">New Status:</label>
-            <select id="new-status" required>
-              <option value="">Select Status</option>
-              <option value="active">Active</option>
-              <option value="on_duty">On Duty</option>
-              <option value="off_duty">Off Duty</option>
-              <option value="on_leave">On Leave</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="status-notes">Notes:</label>
-            <textarea id="status-notes" rows="3" placeholder="Optional notes about status change..."></textarea>
+        <h3>📅 Manage Staff Schedule</h3>
+        <form id="schedule-form">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="schedule-staff-select">Select Staff Member:</label>
+              <select id="schedule-staff-select" required>
+                <option value="">Select Staff Member</option>
+                <!-- Staff members will be loaded here -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="schedule-week">Week Starting:</label>
+              <input type="date" id="schedule-week" required>
+            </div>
+            <div class="form-group">
+              <label for="monday-shift">Monday:</label>
+              <select id="monday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tuesday-shift">Tuesday:</label>
+              <select id="tuesday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="wednesday-shift">Wednesday:</label>
+              <select id="wednesday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="thursday-shift">Thursday:</label>
+              <select id="thursday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="friday-shift">Friday:</label>
+              <select id="friday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="saturday-shift">Saturday:</label>
+              <select id="saturday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sunday-shift">Sunday:</label>
+              <select id="sunday-shift">
+                <option value="off">Off</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+                <option value="night">Night</option>
+                <option value="on_call">On Call</option>
+              </select>
+            </div>
           </div>
           <div class="form-actions">
-            <button type="submit">Update Status</button>
-            <button type="button" id="cancel-status">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Schedule</button>
+            <button type="button" class="btn btn-secondary" id="cancel-schedule">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Status Change -->
+    <div class="modal" id="status-modal">
+      <div class="modal-content">
+        <h3>🔄 Change Staff Status</h3>
+        <form id="status-form">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="status-staff-select">Staff Member:</label>
+              <select id="status-staff-select" required>
+                <option value="">Select Staff Member</option>
+                <!-- Staff members will be loaded here -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="new-status">New Status:</label>
+              <select id="new-status" required>
+                <option value="">Select Status</option>
+                <option value="on_duty">On Duty</option>
+                <option value="off_duty">Off Duty</option>
+                <option value="on_leave">On Leave</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="effective-date">Effective Date:</label>
+              <input type="date" id="effective-date" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="status-notes">Notes:</label>
+              <textarea id="status-notes" rows="3" placeholder="Optional notes about status change..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-success">Update Status</button>
+            <button type="button" class="btn btn-secondary" id="cancel-status">Cancel</button>
           </div>
         </form>
       </div>
@@ -392,6 +1149,196 @@
   </div>
 
   <script>
+    // Sample staff data - in production this would come from API
+    const staffData = [
+      {
+        id: 'STF001',
+        firstName: 'Sarah',
+        lastName: 'Wilson',
+        email: 'sarah.wilson@hospital.com',
+        phone: '555-0101',
+        role: 'doctor',
+        department: 'emergency',
+        status: 'on_duty',
+        shift: 'morning',
+        hireDate: '2020-03-15',
+        salary: 180000,
+        qualifications: 'MD Emergency Medicine, Board Certified Emergency Physician, ACLS, PALS',
+        schedule: {
+          monday: 'morning',
+          tuesday: 'morning',
+          wednesday: 'off',
+          thursday: 'morning',
+          friday: 'morning',
+          saturday: 'off',
+          sunday: 'on_call'
+        }
+      },
+      {
+        id: 'STF002',
+        firstName: 'Michael',
+        lastName: 'Chen',
+        email: 'michael.chen@hospital.com',
+        phone: '555-0102',
+        role: 'doctor',
+        department: 'icu',
+        status: 'on_duty',
+        shift: 'night',
+        hireDate: '2019-08-22',
+        salary: 195000,
+        qualifications: 'MD Critical Care Medicine, Pulmonology, Intensive Care Board Certified',
+        schedule: {
+          monday: 'night',
+          tuesday: 'night',
+          wednesday: 'night',
+          thursday: 'off',
+          friday: 'off',
+          saturday: 'night',
+          sunday: 'night'
+        }
+      },
+      {
+        id: 'STF003',
+        firstName: 'Emily',
+        lastName: 'Roberts',
+        email: 'emily.roberts@hospital.com',
+        phone: '555-0103',
+        role: 'nurse',
+        department: 'general',
+        status: 'on_duty',
+        shift: 'afternoon',
+        hireDate: '2021-01-10',
+        salary: 75000,
+        qualifications: 'RN BSN, Medical-Surgical Nursing Certification, BLS, ACLS',
+        schedule: {
+          monday: 'afternoon',
+          tuesday: 'afternoon',
+          wednesday: 'afternoon',
+          thursday: 'off',
+          friday: 'afternoon',
+          saturday: 'afternoon',
+          sunday: 'off'
+        }
+      },
+      {
+        id: 'STF004',
+        firstName: 'Kevin',
+        lastName: 'Park',
+        email: 'kevin.park@hospital.com',
+        phone: '555-0104',
+        role: 'doctor',
+        department: 'surgery',
+        status: 'off_duty',
+        shift: 'morning',
+        hireDate: '2018-05-12',
+        salary: 220000,
+        qualifications: 'MD General Surgery, Laparoscopic Surgery Specialist, Board Certified Surgeon',
+        schedule: {
+          monday: 'morning',
+          tuesday: 'morning',
+          wednesday: 'morning',
+          thursday: 'morning',
+          friday: 'off',
+          saturday: 'off',
+          sunday: 'on_call'
+        }
+      },
+      {
+        id: 'STF005',
+        firstName: 'Amanda',
+        lastName: 'Lee',
+        email: 'amanda.lee@hospital.com',
+        phone: '555-0105',
+        role: 'nurse',
+        department: 'icu',
+        status: 'on_duty',
+        shift: 'night',
+        hireDate: '2020-11-08',
+        salary: 82000,
+        qualifications: 'RN BSN, Critical Care Certification (CCRN), Trauma Nursing, ACLS',
+        schedule: {
+          monday: 'night',
+          tuesday: 'night',
+          wednesday: 'off',
+          thursday: 'night',
+          friday: 'night',
+          saturday: 'off',
+          sunday: 'off'
+        }
+      },
+      {
+        id: 'STF006',
+        firstName: 'Lisa',
+        lastName: 'Brown',
+        email: 'lisa.brown@hospital.com',
+        phone: '555-0106',
+        role: 'technician',
+        department: 'emergency',
+        status: 'on_duty',
+        shift: 'afternoon',
+        hireDate: '2022-02-14',
+        salary: 55000,
+        qualifications: 'Certified Medical Technician, X-Ray Technician, EKG Certified',
+        schedule: {
+          monday: 'afternoon',
+          tuesday: 'off',
+          wednesday: 'afternoon',
+          thursday: 'afternoon',
+          friday: 'afternoon',
+          saturday: 'afternoon',
+          sunday: 'off'
+        }
+      },
+      {
+        id: 'STF007',
+        firstName: 'David',
+        lastName: 'Martinez',
+        email: 'david.martinez@hospital.com',
+        phone: '555-0107',
+        role: 'administrator',
+        department: 'administration',
+        status: 'on_leave',
+        shift: 'morning',
+        hireDate: '2017-09-03',
+        salary: 95000,
+        qualifications: 'MBA Healthcare Administration, Healthcare Management Certification',
+        schedule: {
+          monday: 'morning',
+          tuesday: 'morning',
+          wednesday: 'morning',
+          thursday: 'morning',
+          friday: 'morning',
+          saturday: 'off',
+          sunday: 'off'
+        }
+      },
+      {
+        id: 'STF008',
+        firstName: 'Jennifer',
+        lastName: 'Taylor',
+        email: 'jennifer.taylor@hospital.com',
+        phone: '555-0108',
+        role: 'nurse',
+        department: 'surgery',
+        status: 'on_duty',
+        shift: 'morning',
+        hireDate: '2019-12-01',
+        salary: 78000,
+        qualifications: 'RN BSN, Operating Room Nursing Certification, Surgical Technology',
+        schedule: {
+          monday: 'morning',
+          tuesday: 'morning',
+          wednesday: 'morning',
+          thursday: 'off',
+          friday: 'morning',
+          saturday: 'off',
+          sunday: 'on_call'
+        }
+      }
+    ];
+
+    let selectedStaff = null;
+    let searchTimeout = null;
     // Sidebar functionality
     const menuBtn = document.getElementById('menu-btn');
     const sidebar = document.getElementById('sidebar');
@@ -410,77 +1357,487 @@
       mainContent.classList.remove('shifted');
     });
 
-    // Basic page functionality will be added here
+    // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
       console.log('Staff Management page loaded');
       
-      // Initialize page
-      loadStaff();
-      loadDepartmentStats();
+      // Set default dates
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('hire-date').value = today;
+      document.getElementById('effective-date').value = today;
+      document.getElementById('schedule-week').value = today;
       
       // Event listeners
-      document.getElementById('add-staff-btn').addEventListener('click', showAddStaffModal);
-      document.getElementById('staff-login-btn').addEventListener('click', showLoginModal);
-      document.getElementById('update-schedules-btn').addEventListener('click', showStatusModal);
-      document.getElementById('refresh-staff-btn').addEventListener('click', loadStaff);
-      document.getElementById('cancel-add-staff').addEventListener('click', hideAddStaffModal);
-      document.getElementById('cancel-login').addEventListener('click', hideLoginModal);
-      document.getElementById('cancel-status').addEventListener('click', hideStatusModal);
-      document.getElementById('add-staff-form').addEventListener('submit', handleAddStaffSubmit);
-      document.getElementById('login-form').addEventListener('submit', handleLoginSubmit);
-      document.getElementById('status-form').addEventListener('submit', handleStatusSubmit);
+      setupEventListeners();
+      updateStatistics();
+      updateDepartmentCounts();
+      loadStatusSelects();
+      loadScheduleSelects();
     });
 
-    function loadStaff() {
-      // Will be implemented with API calls
-      console.log('Loading staff...');
+    function setupEventListeners() {
+      // Search functionality
+      document.getElementById('staff-search-input').addEventListener('input', handleSearch);
+      document.getElementById('staff-search-input').addEventListener('focus', showSearchDropdown);
+      document.addEventListener('click', handleClickOutside);
+      
+      // Modal controls
+      document.getElementById('add-staff-btn').addEventListener('click', () => showModal('add-staff-modal'));
+      document.getElementById('staff-login-btn').addEventListener('click', () => showModal('login-modal'));
+      document.getElementById('update-schedules-btn').addEventListener('click', () => showModal('schedule-modal'));
+      document.getElementById('edit-staff-btn').addEventListener('click', () => showEditModal());
+      document.getElementById('change-status-btn').addEventListener('click', () => showModal('status-modal'));
+      document.getElementById('edit-schedule-btn').addEventListener('click', () => showModal('schedule-modal'));
+      
+      // Cancel buttons
+      document.getElementById('cancel-add-staff').addEventListener('click', () => hideModal('add-staff-modal'));
+      document.getElementById('cancel-edit-staff').addEventListener('click', () => hideModal('edit-staff-modal'));
+      document.getElementById('cancel-login').addEventListener('click', () => hideModal('login-modal'));
+      document.getElementById('cancel-schedule').addEventListener('click', () => hideModal('schedule-modal'));
+      document.getElementById('cancel-status').addEventListener('click', () => hideModal('status-modal'));
+      
+      // Form submissions
+      document.getElementById('add-staff-form').addEventListener('submit', handleAddStaffSubmit);
+      document.getElementById('edit-staff-form').addEventListener('submit', handleEditStaffSubmit);
+      document.getElementById('login-form').addEventListener('submit', handleLoginSubmit);
+      document.getElementById('schedule-form').addEventListener('submit', handleScheduleSubmit);
+      document.getElementById('status-form').addEventListener('submit', handleStatusSubmit);
+      
+      // Staff actions
+      document.getElementById('deactivate-staff-btn').addEventListener('click', deactivateStaff);
     }
 
-    function loadDepartmentStats() {
-      // Will be implemented with API calls
-      console.log('Loading department statistics...');
+    function handleSearch(e) {
+      const query = e.target.value.toLowerCase().trim();
+      
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        if (query.length === 0) {
+          hideSearchDropdown();
+          return;
+        }
+        
+        const results = staffData.filter(staff => 
+          staff.firstName.toLowerCase().includes(query) ||
+          staff.lastName.toLowerCase().includes(query) ||
+          staff.id.toLowerCase().includes(query) ||
+          staff.role.toLowerCase().includes(query) ||
+          staff.department.toLowerCase().includes(query) ||
+          staff.email.toLowerCase().includes(query)
+        );
+        
+        displaySearchResults(results);
+      }, 300);
     }
 
-    function showAddStaffModal() {
-      document.getElementById('add-staff-modal').style.display = 'block';
+    function displaySearchResults(results) {
+      const dropdown = document.getElementById('search-dropdown');
+      
+      if (results.length === 0) {
+        dropdown.innerHTML = '<div class="search-item">No staff members found</div>';
+      } else {
+        dropdown.innerHTML = results.map(staff => `
+          <div class="search-item" onclick="selectStaff('${staff.id}')">
+            <div class="staff-name">${staff.firstName} ${staff.lastName}</div>
+            <div class="staff-info">${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)} - ${staff.department.charAt(0).toUpperCase() + staff.department.slice(1)} | ${staff.status.replace('_', ' ').toUpperCase()}</div>
+          </div>
+        `).join('');
+      }
+      
+      showSearchDropdown();
     }
 
-    function hideAddStaffModal() {
-      document.getElementById('add-staff-modal').style.display = 'none';
+    function selectStaff(staffId) {
+      const staff = staffData.find(s => s.id === staffId);
+      if (staff) {
+        selectedStaff = staff;
+        displayStaffDetails(staff);
+        hideSearchDropdown();
+        document.getElementById('staff-search-input').value = `${staff.firstName} ${staff.lastName}`;
+      }
     }
 
-    function showLoginModal() {
-      document.getElementById('login-modal').style.display = 'block';
+    function displayStaffDetails(staff) {
+      const detailsSection = document.getElementById('staff-details-section');
+      const title = document.getElementById('staff-title');
+      const statusBadge = document.getElementById('staff-status-badge');
+      const infoGrid = document.getElementById('staff-info-grid');
+      const scheduleGrid = document.getElementById('schedule-grid');
+      
+      // Update header
+      title.textContent = `${staff.firstName} ${staff.lastName} (${staff.id})`;
+      statusBadge.textContent = staff.status.replace('_', ' ').toUpperCase();
+      statusBadge.className = `staff-status status-${staff.status.replace('_', '-')}`;
+      
+      // Update staff information
+      infoGrid.innerHTML = `
+        <div class="info-card">
+          <h4>👤 Personal Information</h4>
+          <div class="info-item">
+            <span class="info-label">Full Name:</span>
+            <span class="info-value">${staff.firstName} ${staff.lastName}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Staff ID:</span>
+            <span class="info-value">${staff.id}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">${staff.email}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">${staff.phone}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Hire Date:</span>
+            <span class="info-value">${new Date(staff.hireDate).toLocaleDateString()}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <h4>🏥 Professional Information</h4>
+          <div class="info-item">
+            <span class="info-label">Role:</span>
+            <span class="info-value">${staff.role.charAt(0).toUpperCase() + staff.role.slice(1)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Department:</span>
+            <span class="info-value">${staff.department.charAt(0).toUpperCase() + staff.department.slice(1)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status:</span>
+            <span class="info-value">${staff.status.replace('_', ' ').toUpperCase()}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Primary Shift:</span>
+            <span class="info-value">${staff.shift.charAt(0).toUpperCase() + staff.shift.slice(1)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Annual Salary:</span>
+            <span class="info-value">$${staff.salary.toLocaleString()}</span>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <h4>🎓 Qualifications & Certifications</h4>
+          <div class="info-item">
+            <span class="info-value" style="width: 100%; text-align: left;">${staff.qualifications}</span>
+          </div>
+        </div>
+      `;
+      
+      // Update weekly schedule
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      
+      scheduleGrid.innerHTML = days.map((day, index) => {
+        const shift = staff.schedule[day];
+        const shiftClass = shift === 'off' ? 'off-duty' : 'on-duty';
+        return `
+          <div class="schedule-day">
+            <div class="day-name">${dayNames[index]}</div>
+            <div class="day-shift ${shiftClass}">${shift.replace('_', ' ').toUpperCase()}</div>
+          </div>
+        `;
+      }).join('');
+      
+      detailsSection.classList.add('show');
     }
 
-    function hideLoginModal() {
-      document.getElementById('login-modal').style.display = 'none';
+    function updateStatistics() {
+      const stats = {
+        total: staffData.length,
+        onDuty: staffData.filter(s => s.status === 'on_duty').length,
+        offDuty: staffData.filter(s => s.status === 'off_duty').length,
+        onLeave: staffData.filter(s => s.status === 'on_leave').length
+      };
+      
+      document.getElementById('total-staff').textContent = stats.total;
+      document.getElementById('on-duty-staff').textContent = stats.onDuty;
+      document.getElementById('off-duty-staff').textContent = stats.offDuty;
+      document.getElementById('on-leave-staff').textContent = stats.onLeave;
     }
 
-    function showStatusModal() {
-      document.getElementById('status-modal').style.display = 'block';
+    function updateDepartmentCounts() {
+      const departments = ['emergency', 'icu', 'general', 'surgery', 'administration'];
+      
+      departments.forEach(dept => {
+        const count = staffData.filter(s => s.department === dept).length;
+        document.getElementById(`${dept}-count`).textContent = count;
+      });
     }
 
-    function hideStatusModal() {
-      document.getElementById('status-modal').style.display = 'none';
+    function loadStatusSelects() {
+      const selects = ['status-staff-select'];
+      
+      selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+          select.innerHTML = '<option value="">Select Staff Member</option>' +
+            staffData.map(s => 
+              `<option value="${s.id}">${s.firstName} ${s.lastName} (${s.role.charAt(0).toUpperCase() + s.role.slice(1)})</option>`
+            ).join('');
+        }
+      });
     }
 
+    function loadScheduleSelects() {
+      const select = document.getElementById('schedule-staff-select');
+      if (select) {
+        select.innerHTML = '<option value="">Select Staff Member</option>' +
+          staffData.map(s => 
+            `<option value="${s.id}">${s.firstName} ${s.lastName} - ${s.department.charAt(0).toUpperCase() + s.department.slice(1)}</option>`
+          ).join('');
+      }
+    }
+
+    function showModal(modalId) {
+      document.getElementById(modalId).style.display = 'block';
+    }
+
+    function hideModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
+    }
+
+    function showEditModal() {
+      if (!selectedStaff) {
+        showNotification('Please select a staff member first', 'error');
+        return;
+      }
+      
+      // Populate edit form
+      document.getElementById('edit-staff-id').value = selectedStaff.id;
+      document.getElementById('edit-first-name').value = selectedStaff.firstName;
+      document.getElementById('edit-last-name').value = selectedStaff.lastName;
+      document.getElementById('edit-email').value = selectedStaff.email;
+      document.getElementById('edit-phone').value = selectedStaff.phone;
+      document.getElementById('edit-role').value = selectedStaff.role;
+      document.getElementById('edit-department').value = selectedStaff.department;
+      document.getElementById('edit-status').value = selectedStaff.status;
+      document.getElementById('edit-salary').value = selectedStaff.salary;
+      document.getElementById('edit-qualifications').value = selectedStaff.qualifications;
+      
+      showModal('edit-staff-modal');
+    }
+
+    function showSearchDropdown() {
+      document.getElementById('search-dropdown').classList.add('show');
+    }
+
+    function hideSearchDropdown() {
+      document.getElementById('search-dropdown').classList.remove('show');
+    }
+
+    function handleClickOutside(e) {
+      const searchContainer = document.querySelector('.search-container');
+      if (!searchContainer.contains(e.target)) {
+        hideSearchDropdown();
+      }
+    }
+
+    // Form submission handlers
     function handleAddStaffSubmit(e) {
       e.preventDefault();
-      // Will be implemented with API calls
-      console.log('Submitting add staff form...');
+      
+      const formData = {
+        id: document.getElementById('staff-id').value,
+        firstName: document.getElementById('first-name').value,
+        lastName: document.getElementById('last-name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        role: document.getElementById('role').value,
+        department: document.getElementById('department').value,
+        status: 'active',
+        shift: document.getElementById('shift').value,
+        hireDate: document.getElementById('hire-date').value,
+        salary: parseInt(document.getElementById('salary').value) || 0,
+        qualifications: document.getElementById('qualifications').value,
+        schedule: {
+          monday: 'off',
+          tuesday: 'off',
+          wednesday: 'off',
+          thursday: 'off',
+          friday: 'off',
+          saturday: 'off',
+          sunday: 'off'
+        }
+      };
+      
+      // Add to staff data
+      staffData.push(formData);
+      updateStatistics();
+      updateDepartmentCounts();
+      loadStatusSelects();
+      loadScheduleSelects();
+      hideModal('add-staff-modal');
+      
+      showNotification(`Staff member ${formData.firstName} ${formData.lastName} added successfully!`, 'success');
+      
+      // Reset form
+      document.getElementById('add-staff-form').reset();
+    }
+
+    function handleEditStaffSubmit(e) {
+      e.preventDefault();
+      
+      if (!selectedStaff) return;
+      
+      // Update staff data
+      selectedStaff.firstName = document.getElementById('edit-first-name').value;
+      selectedStaff.lastName = document.getElementById('edit-last-name').value;
+      selectedStaff.email = document.getElementById('edit-email').value;
+      selectedStaff.phone = document.getElementById('edit-phone').value;
+      selectedStaff.role = document.getElementById('edit-role').value;
+      selectedStaff.department = document.getElementById('edit-department').value;
+      selectedStaff.status = document.getElementById('edit-status').value;
+      selectedStaff.salary = parseInt(document.getElementById('edit-salary').value);
+      selectedStaff.qualifications = document.getElementById('edit-qualifications').value;
+      
+      // Refresh display
+      displayStaffDetails(selectedStaff);
+      updateStatistics();
+      updateDepartmentCounts();
+      hideModal('edit-staff-modal');
+      
+      showNotification(`Staff member ${selectedStaff.firstName} ${selectedStaff.lastName} updated successfully!`, 'success');
     }
 
     function handleLoginSubmit(e) {
       e.preventDefault();
-      // Will be implemented with API calls
-      console.log('Submitting login form...');
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      // Simple authentication simulation
+      const staff = staffData.find(s => s.email === email);
+      
+      if (staff) {
+        showNotification(`Welcome back, ${staff.firstName}!`, 'success');
+        hideModal('login-modal');
+        
+        // Auto-select the logged-in staff member
+        selectStaff(staff.id);
+      } else {
+        showNotification('Invalid email or password', 'error');
+      }
+      
+      // Reset form
+      document.getElementById('login-form').reset();
+    }
+
+    function handleScheduleSubmit(e) {
+      e.preventDefault();
+      
+      const staffId = document.getElementById('schedule-staff-select').value;
+      const staff = staffData.find(s => s.id === staffId);
+      
+      if (!staff) return;
+      
+      // Update schedule
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      days.forEach(day => {
+        const shift = document.getElementById(`${day}-shift`).value;
+        staff.schedule[day] = shift;
+      });
+      
+      // Refresh display if this staff is selected
+      if (selectedStaff && selectedStaff.id === staffId) {
+        displayStaffDetails(staff);
+      }
+      
+      hideModal('schedule-modal');
+      showNotification(`Schedule updated for ${staff.firstName} ${staff.lastName}!`, 'success');
+      
+      // Reset form
+      document.getElementById('schedule-form').reset();
     }
 
     function handleStatusSubmit(e) {
       e.preventDefault();
-      // Will be implemented with API calls
-      console.log('Submitting status update...');
+      
+      const staffId = document.getElementById('status-staff-select').value;
+      const staff = staffData.find(s => s.id === staffId);
+      const newStatus = document.getElementById('new-status').value;
+      
+      if (!staff) return;
+      
+      // Update status
+      staff.status = newStatus;
+      
+      // Refresh data
+      updateStatistics();
+      
+      if (selectedStaff && selectedStaff.id === staffId) {
+        displayStaffDetails(staff);
+      }
+      
+      hideModal('status-modal');
+      showNotification(`Status updated for ${staff.firstName} ${staff.lastName}!`, 'success');
+      
+      // Reset form
+      document.getElementById('status-form').reset();
+    }
+
+    function deactivateStaff() {
+      if (!selectedStaff) {
+        showNotification('Please select a staff member first', 'error');
+        return;
+      }
+      
+      if (confirm(`Are you sure you want to deactivate ${selectedStaff.firstName} ${selectedStaff.lastName}?`)) {
+        selectedStaff.status = 'inactive';
+        displayStaffDetails(selectedStaff);
+        updateStatistics();
+        showNotification(`Staff member ${selectedStaff.firstName} ${selectedStaff.lastName} deactivated`, 'success');
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 3000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        max-width: 300px;
+      `;
+      
+      switch(type) {
+        case 'success':
+          notification.style.background = 'linear-gradient(135deg, #4CAF50, #66BB6A)';
+          break;
+        case 'error':
+          notification.style.background = 'linear-gradient(135deg, #F44336, #EF5350)';
+          break;
+        default:
+          notification.style.background = 'linear-gradient(135deg, #2196F3, #42A5F5)';
+      }
+      
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 4000);
     }
   </script>
 </body>
