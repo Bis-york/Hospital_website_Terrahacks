@@ -1,199 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Drug Interaction Checker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8">
+  <title>Drug Interaction Checker</title>
+  <style>
+    :root {
+      --bg-light: #eaf6f6;
+      --bg-card: #ffffff;
+      --primary: #6a9ac4;
+      --accent: #9ed5cb;
+      --highlight: #b8a4d4;
+      --text-dark: #2d2d2d;
+      --text-muted: #555;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
 
-        .container {
-            max-width: 420px;
-            margin: 60px auto;
-            background: #fff;
-            padding: 32px 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-light);
+      margin: 0;
+      padding: 0;
+    }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 24px;
-        }
+    .top-info {
+      text-align: center;
+      padding: 20px 10px;
+      background: linear-gradient(to right, var(--accent), var(--highlight));
+      color: white;
+    }
 
-        textarea {
-            width: 100%;
-            height: 80px;
-            padding: 8px;
-            font-size: 1em;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            resize: vertical;
-        }
+    .top-info p {
+      margin: 5px 0;
+    }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 16px;
-            background: #0078d4;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 1em;
-            cursor: pointer;
-        }
+    .p1 {
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-        .result {
-            margin-top: 24px;
-            padding: 16px;
-            border-radius: 4px;
-            background: #f0f8ff;
-            min-height: 40px;
-        }
+    .p2 {
+      font-size: 16px;
+    }
 
-        .severity-high {
-            color: #d8000c;
-        }
+    .p3 {
+      font-size: 14px;
+    }
 
-        .severity-moderate {
-            color: #9f6000;
-        }
+    .menu-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-        .severity-low {
-            color: #00529b;
-        }
+    .menu-btn.hidden {
+      display: none;
+    }
 
-        .disclaimer {
-            margin-top: 32px;
-            padding: 12px 16px;
-            background: #fffbe6;
-            border-left: 4px solid #ffc107;
-            border-radius: 6px;
-            color: #856404;
-            font-size: 0.95em;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-            text-align: left;
-        }
-    </style>
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: var(--accent);
+      overflow-x: hidden;
+      transition: width 0.3s ease;
+      padding-top: 60px;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      width: 250px;
+    }
+
+    .sidebar .closebtn {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      font-size: 28px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .sidebar a.button {
+      display: block;
+      margin: 20px;
+      padding: 12px 20px;
+      background-color: var(--highlight);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .sidebar a.button:hover {
+      background-color: #a18acb;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 100px auto;
+      background: var(--bg-card);
+      padding: 32px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px var(--shadow);
+      color: var(--text-dark);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background-color: #f9fefe;
+      resize: vertical;
+      color: var(--text-dark);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #507ba6;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      background: #f0f8ff;
+      color: var(--text-dark);
+      min-height: 40px;
+      border-left: 5px solid var(--highlight);
+    }
+
+    .severity-high {
+      color: #d8000c;
+      font-weight: bold;
+    }
+
+    .severity-moderate {
+      color: #b56200;
+      font-weight: bold;
+    }
+
+    .severity-low {
+      color: #40729b;
+      font-weight: bold;
+    }
+
+    .disclaimer {
+      margin-top: 32px;
+      padding: 14px 18px;
+      background: #fffbea;
+      border-left: 5px solid #f0c36d;
+      border-radius: 8px;
+      color: #856404;
+      font-size: 0.9em;
+      box-shadow: 0 1px 4px var(--shadow);
+    }
+
+    @media (max-width: 768px) {
+      .menu-btn {
+        font-size: 20px;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-        <h2>Drug Interaction Checker</h2>
-        <label for="drugs">Enter drug names (comma separated):</label>
-        <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
-        <button onclick="checkInteractions()">Check Interactions</button>
-        <div class="result" id="result"></div>
-        <div class="disclaimer">
-            <strong>Disclaimer:</strong><br>
-            This tool is for informational and educational purposes only.
-            It does not constitute medical advice, diagnosis, or treatment. Always 
-            consult a qualified healthcare professional or pharmacist before making any 
-            decisions about medications.
-        </div>
+  <div class="top-info">
+    <p class="p1">SickKids Hospital</p>
+    <p class="p2">170 Elizabeth St, Toronto, ON M5G 1E8, Canada</p>
+    <p class="p3">Phone: +1 416-813-1500 | Email: info@sickids.ca</p>
+  </div>
+
+  <!-- ✅ Small Top-left Button -->
+  <button class="menu-btn" id="menuButton" onclick="openSidebar()">☰</button>
+
+  <!-- ✅ Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <span class="closebtn" onclick="closeSidebar()">&times;</span>
+    <a href="drugCheck.html" class="button" target="_blank" rel="noopener">Drug Interaction Checker</a>
+  </div>
+
+  <div class="container">
+    <h2>Drug Interaction Checker</h2>
+    <label for="drugs">Enter drug names (comma separated):</label>
+    <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
+    <button onclick="checkInteractions()">Check Interactions</button>
+    <div class="result" id="result"></div>
+    <div class="disclaimer">
+      <strong>Disclaimer:</strong><br>
+      This tool is for informational and educational purposes only.
+      It does not constitute medical advice, diagnosis, or treatment. Always 
+      consult a qualified healthcare professional or pharmacist before making any 
+      decisions about medications.
     </div>
-    <script>
-        // Example interaction data (for demo purposes)
+  </div>
 
-        const severityLabels = {
-            high: '<span class="severity-high">High Severity</span>',
-            moderate: '<span class="severity-moderate">Moderate Severity</span>',
-            low: '<span class="severity-low">Low Severity</span>'
-        };
+  <script>
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("open");
+      document.getElementById("menuButton").classList.add("hidden");
+    }
 
-        async function checkInteractions() {
-            const input = document.getElementById('drugs').value;
-            const drugs = input.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
-            const resultDiv = document.getElementById('result');
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("menuButton").classList.remove("hidden");
+    }
 
-            if (drugs.length < 2) {
-                resultDiv.innerHTML = "Please enter at least two drugs.";
-                return;
-            }
+    async function checkInteractions() {
+      const input = document.getElementById('drugs').value;
+      const drugs = input.split(',').map(d => d.trim().toLowerCase()).filter(Boolean);
+      const resultDiv = document.getElementById('result');
 
-            try {
-                // Prepare the API request
-                const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-goog-api-key": "AIzaSyB5P2ggDEPKUE72hwgwFq0M2Y5ICzRLW1M"
-                    },
-                    body: JSON.stringify({
-                        contents: [
-                            {
-                                parts: [
-                                    {
-                                        text: `Check for drug interactions among: ${drugs.join(", ")}.
-                                        Respond only with a valid JSON object, nothing else.
-                                        Format:
-                                        {
-                                        "severity": "high|moderate|low|none",
-                                        "description": ["item1", "item2", "..."],
-                                        "final_recommendation": "summary of what to do"
-                                        }
+      if (drugs.length < 2) {
+        resultDiv.innerHTML = "Please enter at least two drugs.";
+        return;
+      }
+
+      try {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": "AIzaSyB5P2ggDEPKUE72hwgwFq0M2Y5ICzRLW1M"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Check for drug interactions among: ${drugs.join(", ")}.
+Respond only with a valid JSON object, nothing else.
+Format:
+{
+  "severity": "high|moderate|low|none",
+  "description": ["item1", "item2", "..."],
+  "final_recommendation": "summary of what to do"
+}
 
 Drugs: ${drugs.join(", ")}`
-                                    }
-                                ]
-                            }
-                        ]
-                    })
-                });
+                  }
+                ]
+              }
+            ]
+          })
+        });
 
-                // Handle the API response
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.statusText}`);
-                }
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
 
-                const data = await response.json();
-                const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (generatedText) {
-                    let interactionData;
-                    try {
-                        // Try to find the first valid JSON object in the response
-                        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-                        if (jsonMatch) {
-                            interactionData = JSON.parse(jsonMatch[0].replace(/'/g, '"'));
-                        } else {
-                            throw new Error("No JSON object found in Gemini response.");
-                        }
-                    } catch (jsonError) {
-                        console.error("JSON parsing error:", jsonError);
-                        console.log("Raw Gemini response:", generatedText);
-                        resultDiv.innerHTML = "Received unexpected format from Gemini. Please try again.";
-                        return;
-                    }
+        const data = await response.json();
+        const generatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-                    // Build the HTML output
-                    let output = `<h3>Interaction Details</h3>`;
-                    output += `<p><strong>Severity:</strong> <span class="severity-${interactionData.severity}">${interactionData.severity.charAt(0).toUpperCase() + interactionData.severity.slice(1)}</span></p>`;
-                    output += `<h4>Description:</h4><ul>`;
-                    if (Array.isArray(interactionData.description)) {
-                        interactionData.description.forEach(item => {
-                            output += `<li>${item}</li>`;
-                        });
-                    } else {
-                        output += `<li>${interactionData.description}</li>`;
-                    }
-                    output += `</ul>`;
-                    output += `<h4>Final Recommendation:</h4><p>${interactionData.final_recommendation || ''}</p>`;
-
-                    resultDiv.innerHTML = output;
-                } else {
-                    resultDiv.innerHTML = "No interaction data found.";
-                }
-            } catch (error) {
-                console.error("Error checking interactions:", error);
-                resultDiv.innerHTML = "An error occurred while checking interactions. Please try again.";
+        if (generatedText) {
+          let interactionData;
+          try {
+            const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              interactionData = JSON.parse(jsonMatch[0].replace(/'/g, '"'));
+            } else {
+              throw new Error("No JSON object found in Gemini response.");
             }
-        }
-    </script>
-</body>
+          } catch (jsonError) {
+            resultDiv.innerHTML = "Received unexpected format from Gemini. Please try again.";
+            return;
+          }
 
+          let output = `<h3>Interaction Details</h3>`;
+          output += `<p><strong>Severity:</strong> <span class="severity-${interactionData.severity}">${interactionData.severity.charAt(0).toUpperCase() + interactionData.severity.slice(1)}</span></p>`;
+          output += `<h4>Description:</h4><ul>`;
+          if (Array.isArray(interactionData.description)) {
+            interactionData.description.forEach(item => {
+              output += `<li>${item}</li>`;
+            });
+          } else {
+            output += `<li>${interactionData.description}</li>`;
+          }
+          output += `</ul>`;
+          output += `<h4>Final Recommendation:</h4><p>${interactionData.final_recommendation || ''}</p>`;
+          resultDiv.innerHTML = output;
+        } else {
+          resultDiv.innerHTML = "No interaction data found.";
+        }
+
+      } catch (error) {
+        console.error("Error checking interactions:", error);
+        resultDiv.innerHTML = "An error occurred while checking interactions. Please try again.";
+      }
+    }
+  </script>
+</body>
 </html>
