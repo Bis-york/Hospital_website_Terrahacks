@@ -11,12 +11,12 @@ import os
 backend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend')
 sys.path.insert(0, backend_dir)
 
-# Change to backend directory for imports
-os.chdir(backend_dir)
+# Don't change directory, just add to path for imports
 
 if __name__ == '__main__':
     try:
-        from api import app
+        # Import from backend directory
+        from backend.api import app
         print("🏥 Hospital Management System API")
         print("=" * 50)
         print("📋 API Documentation: http://localhost:5000/api/docs")
