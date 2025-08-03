@@ -38,6 +38,7 @@
       color: var(--primary);
       background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       font-size: 2.8em;
       margin-bottom: 30px;
@@ -1149,196 +1150,88 @@
   </div>
 
   <script>
-    // Sample staff data - in production this would come from API
-    const staffData = [
-      {
-        id: 'STF001',
-        firstName: 'Sarah',
-        lastName: 'Wilson',
-        email: 'sarah.wilson@hospital.com',
-        phone: '555-0101',
-        role: 'doctor',
-        department: 'emergency',
-        status: 'on_duty',
-        shift: 'morning',
-        hireDate: '2020-03-15',
-        salary: 180000,
-        qualifications: 'MD Emergency Medicine, Board Certified Emergency Physician, ACLS, PALS',
-        schedule: {
-          monday: 'morning',
-          tuesday: 'morning',
-          wednesday: 'off',
-          thursday: 'morning',
-          friday: 'morning',
-          saturday: 'off',
-          sunday: 'on_call'
-        }
-      },
-      {
-        id: 'STF002',
-        firstName: 'Michael',
-        lastName: 'Chen',
-        email: 'michael.chen@hospital.com',
-        phone: '555-0102',
-        role: 'doctor',
-        department: 'icu',
-        status: 'on_duty',
-        shift: 'night',
-        hireDate: '2019-08-22',
-        salary: 195000,
-        qualifications: 'MD Critical Care Medicine, Pulmonology, Intensive Care Board Certified',
-        schedule: {
-          monday: 'night',
-          tuesday: 'night',
-          wednesday: 'night',
-          thursday: 'off',
-          friday: 'off',
-          saturday: 'night',
-          sunday: 'night'
-        }
-      },
-      {
-        id: 'STF003',
-        firstName: 'Emily',
-        lastName: 'Roberts',
-        email: 'emily.roberts@hospital.com',
-        phone: '555-0103',
-        role: 'nurse',
-        department: 'general',
-        status: 'on_duty',
-        shift: 'afternoon',
-        hireDate: '2021-01-10',
-        salary: 75000,
-        qualifications: 'RN BSN, Medical-Surgical Nursing Certification, BLS, ACLS',
-        schedule: {
-          monday: 'afternoon',
-          tuesday: 'afternoon',
-          wednesday: 'afternoon',
-          thursday: 'off',
-          friday: 'afternoon',
-          saturday: 'afternoon',
-          sunday: 'off'
-        }
-      },
-      {
-        id: 'STF004',
-        firstName: 'Kevin',
-        lastName: 'Park',
-        email: 'kevin.park@hospital.com',
-        phone: '555-0104',
-        role: 'doctor',
-        department: 'surgery',
-        status: 'off_duty',
-        shift: 'morning',
-        hireDate: '2018-05-12',
-        salary: 220000,
-        qualifications: 'MD General Surgery, Laparoscopic Surgery Specialist, Board Certified Surgeon',
-        schedule: {
-          monday: 'morning',
-          tuesday: 'morning',
-          wednesday: 'morning',
-          thursday: 'morning',
-          friday: 'off',
-          saturday: 'off',
-          sunday: 'on_call'
-        }
-      },
-      {
-        id: 'STF005',
-        firstName: 'Amanda',
-        lastName: 'Lee',
-        email: 'amanda.lee@hospital.com',
-        phone: '555-0105',
-        role: 'nurse',
-        department: 'icu',
-        status: 'on_duty',
-        shift: 'night',
-        hireDate: '2020-11-08',
-        salary: 82000,
-        qualifications: 'RN BSN, Critical Care Certification (CCRN), Trauma Nursing, ACLS',
-        schedule: {
-          monday: 'night',
-          tuesday: 'night',
-          wednesday: 'off',
-          thursday: 'night',
-          friday: 'night',
-          saturday: 'off',
-          sunday: 'off'
-        }
-      },
-      {
-        id: 'STF006',
-        firstName: 'Lisa',
-        lastName: 'Brown',
-        email: 'lisa.brown@hospital.com',
-        phone: '555-0106',
-        role: 'technician',
-        department: 'emergency',
-        status: 'on_duty',
-        shift: 'afternoon',
-        hireDate: '2022-02-14',
-        salary: 55000,
-        qualifications: 'Certified Medical Technician, X-Ray Technician, EKG Certified',
-        schedule: {
-          monday: 'afternoon',
-          tuesday: 'off',
-          wednesday: 'afternoon',
-          thursday: 'afternoon',
-          friday: 'afternoon',
-          saturday: 'afternoon',
-          sunday: 'off'
-        }
-      },
-      {
-        id: 'STF007',
-        firstName: 'David',
-        lastName: 'Martinez',
-        email: 'david.martinez@hospital.com',
-        phone: '555-0107',
-        role: 'administrator',
-        department: 'administration',
-        status: 'on_leave',
-        shift: 'morning',
-        hireDate: '2017-09-03',
-        salary: 95000,
-        qualifications: 'MBA Healthcare Administration, Healthcare Management Certification',
-        schedule: {
-          monday: 'morning',
-          tuesday: 'morning',
-          wednesday: 'morning',
-          thursday: 'morning',
-          friday: 'morning',
-          saturday: 'off',
-          sunday: 'off'
-        }
-      },
-      {
-        id: 'STF008',
-        firstName: 'Jennifer',
-        lastName: 'Taylor',
-        email: 'jennifer.taylor@hospital.com',
-        phone: '555-0108',
-        role: 'nurse',
-        department: 'surgery',
-        status: 'on_duty',
-        shift: 'morning',
-        hireDate: '2019-12-01',
-        salary: 78000,
-        qualifications: 'RN BSN, Operating Room Nursing Certification, Surgical Technology',
-        schedule: {
-          monday: 'morning',
-          tuesday: 'morning',
-          wednesday: 'morning',
-          thursday: 'off',
-          friday: 'morning',
-          saturday: 'off',
-          sunday: 'on_call'
-        }
-      }
-    ];
-
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const HOSPITAL_ID = 'HOSP001'; // Using hospital_id for now
+    
+    // Global variables
+    let staffData = [];
     let selectedStaff = null;
     let searchTimeout = null;
+    
+    // Fetch staff data from API
+    async function fetchStaff() {
+      try {
+        console.log('Fetching staff data...');
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/staff`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          staffData = result.data.map(staff => ({
+            id: staff._id,
+            firstName: staff.name.split(' ')[0],
+            lastName: staff.name.split(' ').slice(1).join(' '),
+            name: staff.name,
+            email: staff.email,
+            phone: staff.phone,
+            role: staff.employee_type.toLowerCase(),
+            department: staff.department.toLowerCase(),
+            position: staff.position,
+            status: staff.status,
+            shift: staff.shift.toLowerCase(),
+            hireDate: staff.hire_date ? staff.hire_date.split('T')[0] : '2024-01-01',
+            salary: staff.salary || 0,
+            qualifications: Array.isArray(staff.qualifications) ? staff.qualifications.join(', ') : (staff.qualifications || ''),
+            experience_years: staff.experience_years || 0,
+            specializations: Array.isArray(staff.specializations) ? staff.specializations.join(', ') : (staff.specializations || ''),
+            schedule: staff.schedule || {},
+            emergency_contact: staff.emergency_contact || {},
+            address: staff.address || '',
+            staff_id: staff.staff_id
+          }));
+          console.log('Staff data loaded:', staffData.length, 'staff members');
+          return staffData;
+        }
+      } catch (error) {
+        console.error('Error fetching staff:', error);
+        staffData = [];
+        return [];
+      }
+    }
+
+    // Fetch staff statistics from API
+    async function fetchStaffStatistics() {
+      try {
+        console.log('Fetching staff statistics...');
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/staff/statistics`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          console.log('Staff statistics loaded:', result.data);
+          return result.data;
+        } else {
+          throw new Error(result.error || 'Failed to fetch staff statistics');
+        }
+      } catch (error) {
+        console.error('Error fetching staff statistics:', error);
+        return {
+          total_staff: 0,
+          active_staff: 0,
+          inactive_staff: 0,
+          on_leave: 0,
+          department_breakdown: {}
+        };
+      }
+    }
+
     // Sidebar functionality
     const menuBtn = document.getElementById('menu-btn');
     const sidebar = document.getElementById('sidebar');
@@ -1358,8 +1251,11 @@
     });
 
     // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
       console.log('Staff Management page loaded');
+      
+      // Load staff data from API first
+      await fetchStaff();
       
       // Set default dates
       const today = new Date().toISOString().split('T')[0];
@@ -1369,7 +1265,7 @@
       
       // Event listeners
       setupEventListeners();
-      updateStatistics();
+      await updateStatisticsFromAPI();
       updateDepartmentCounts();
       loadStatusSelects();
       loadScheduleSelects();
@@ -1548,7 +1444,7 @@
     function updateStatistics() {
       const stats = {
         total: staffData.length,
-        onDuty: staffData.filter(s => s.status === 'on_duty').length,
+        onDuty: staffData.filter(s => s.status === 'active').length,
         offDuty: staffData.filter(s => s.status === 'off_duty').length,
         onLeave: staffData.filter(s => s.status === 'on_leave').length
       };
@@ -1557,6 +1453,23 @@
       document.getElementById('on-duty-staff').textContent = stats.onDuty;
       document.getElementById('off-duty-staff').textContent = stats.offDuty;
       document.getElementById('on-leave-staff').textContent = stats.onLeave;
+    }
+    
+    async function updateStatisticsFromAPI() {
+      try {
+        const stats = await fetchStaffStatistics();
+        
+        document.getElementById('total-staff').textContent = stats.total_staff || 0;
+        document.getElementById('on-duty-staff').textContent = stats.active_staff || 0;
+        document.getElementById('off-duty-staff').textContent = stats.inactive_staff || 0;
+        document.getElementById('on-leave-staff').textContent = stats.on_leave || 0;
+        
+        console.log('Statistics updated from API:', stats);
+      } catch (error) {
+        console.error('Error updating statistics from API:', error);
+        // Fallback to local data
+        updateStatistics();
+      }
     }
 
     function updateDepartmentCounts() {

@@ -38,6 +38,7 @@
       color: var(--primary);
       background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       font-size: 2.8em;
       margin-bottom: 30px;
@@ -1438,245 +1439,117 @@
   </div>
 
   <script>
-    // Sample inventory data - in production this would come from API
-    const inventoryData = [
-      {
-        id: 'INV001',
-        name: 'Acetaminophen 500mg',
-        category: 'medications',
-        currentStock: 45,
-        minStock: 50,
-        maxStock: 200,
-        unit: 'boxes',
-        costPerUnit: 12.50,
-        supplier: 'PharmaCorp Ltd',
-        location: 'Pharmacy - Shelf A1',
-        expiryDate: '2025-12-15',
-        batchNumber: 'BAT2025001',
-        description: 'Pain relief medication, commonly used for fever and mild to moderate pain',
-        status: 'low_stock',
-        lastUpdated: '2025-01-20T10:30:00',
-        transactions: [
-          {
-            type: 'restock',
-            quantity: 50,
-            date: '2025-01-15T09:00:00',
-            reference: 'PO-2025-001',
-            notes: 'Monthly restock from PharmaCorp'
-          },
-          {
-            type: 'usage',
-            quantity: -25,
-            date: '2025-01-18T14:30:00',
-            reference: 'REQ-ER-001',
-            notes: 'Emergency department usage'
-          }
-        ]
-      },
-      {
-        id: 'INV002',
-        name: 'Surgical Gloves (Medium)',
-        category: 'medical_supplies',
-        currentStock: 150,
-        minStock: 100,
-        maxStock: 500,
-        unit: 'boxes',
-        costPerUnit: 8.25,
-        supplier: 'MedSupply Inc',
-        location: 'Supply Room - B2',
-        expiryDate: '2026-06-30',
-        batchNumber: 'GLV2025M',
-        description: 'Latex-free surgical gloves, powder-free, medium size',
-        status: 'in_stock',
-        lastUpdated: '2025-01-19T16:45:00',
-        transactions: [
-          {
-            type: 'restock',
-            quantity: 200,
-            date: '2025-01-10T11:00:00',
-            reference: 'PO-2025-002',
-            notes: 'Bulk purchase for Q1'
-          },
-          {
-            type: 'usage',
-            quantity: -50,
-            date: '2025-01-19T16:45:00',
-            reference: 'REQ-OR-001',
-            notes: 'Operating room consumption'
-          }
-        ]
-      },
-      {
-        id: 'INV003',
-        name: 'Digital Thermometer',
-        category: 'equipment',
-        currentStock: 12,
-        minStock: 10,
-        maxStock: 25,
-        unit: 'pieces',
-        costPerUnit: 35.00,
-        supplier: 'MedTech Solutions',
-        location: 'Equipment Storage - C1',
-        expiryDate: null,
-        batchNumber: 'THERM2025',
-        description: 'Digital oral/axillary thermometer with fever alarm',
-        status: 'in_stock',
-        lastUpdated: '2025-01-22T08:15:00',
-        transactions: [
-          {
-            type: 'restock',
-            quantity: 15,
-            date: '2025-01-05T13:20:00',
-            reference: 'PO-2025-003',
-            notes: 'Replacement for damaged units'
-          },
-          {
-            type: 'transfer',
-            quantity: -3,
-            date: '2025-01-22T08:15:00',
-            reference: 'TRANS-ICU-001',
-            notes: 'Transfer to ICU department'
-          }
-        ]
-      },
-      {
-        id: 'INV004',
-        name: 'Disposable Syringes 10ml',
-        category: 'consumables',
-        currentStock: 25,
-        minStock: 100,
-        maxStock: 1000,
-        unit: 'boxes',
-        costPerUnit: 15.75,
-        supplier: 'SafetyFirst Medical',
-        location: 'Supply Room - A3',
-        expiryDate: '2027-03-20',
-        batchNumber: 'SYR10ML2025',
-        description: 'Sterile disposable syringes with safety lock mechanism',
-        status: 'low_stock',
-        lastUpdated: '2025-01-21T12:00:00',
-        transactions: [
-          {
-            type: 'usage',
-            quantity: -75,
-            date: '2025-01-20T15:30:00',
-            reference: 'REQ-GEN-001',
-            notes: 'General ward usage - vaccination campaign'
-          }
-        ]
-      },
-      {
-        id: 'INV005',
-        name: 'Ibuprofen 200mg',
-        category: 'medications',
-        currentStock: 0,
-        minStock: 30,
-        maxStock: 150,
-        unit: 'bottles',
-        costPerUnit: 9.50,
-        supplier: 'PharmaCorp Ltd',
-        location: 'Pharmacy - Shelf A2',
-        expiryDate: '2025-02-28',
-        batchNumber: 'IBU2024B',
-        description: 'Anti-inflammatory medication for pain and fever',
-        status: 'out_of_stock',
-        lastUpdated: '2025-01-21T18:00:00',
-        transactions: [
-          {
-            type: 'usage',
-            quantity: -30,
-            date: '2025-01-21T18:00:00',
-            reference: 'REQ-PHARM-001',
-            notes: 'Last bottles dispensed to patients'
-          }
-        ]
-      },
-      {
-        id: 'INV006',
-        name: 'Bandages (Various Sizes)',
-        category: 'medical_supplies',
-        currentStock: 200,
-        minStock: 50,
-        maxStock: 300,
-        unit: 'packs',
-        costPerUnit: 4.25,
-        supplier: 'WoundCare Plus',
-        location: 'Emergency - Cabinet E1',
-        expiryDate: '2026-08-15',
-        batchNumber: 'BAND2025MIX',
-        description: 'Adhesive bandages in assorted sizes for wound care',
-        status: 'in_stock',
-        lastUpdated: '2025-01-20T14:20:00',
-        transactions: [
-          {
-            type: 'restock',
-            quantity: 100,
-            date: '2025-01-12T10:15:00',
-            reference: 'PO-2025-004',
-            notes: 'Emergency department restocking'
-          }
-        ]
-      },
-      {
-        id: 'INV007',
-        name: 'Insulin Pens',
-        category: 'medications',
-        currentStock: 18,
-        minStock: 15,
-        maxStock: 50,
-        unit: 'pens',
-        costPerUnit: 28.00,
-        supplier: 'DiabetesCare Inc',
-        location: 'Refrigerated Storage - R1',
-        expiryDate: '2025-04-10',
-        batchNumber: 'INS2025A',
-        description: 'Pre-filled insulin pens for diabetes management',
-        status: 'expiring_soon',
-        lastUpdated: '2025-01-19T09:30:00',
-        transactions: [
-          {
-            type: 'restock',
-            quantity: 30,
-            date: '2025-01-08T14:00:00',
-            reference: 'PO-2025-005',
-            notes: 'Cold chain delivery - refrigerated storage'
-          },
-          {
-            type: 'usage',
-            quantity: -12,
-            date: '2025-01-19T09:30:00',
-            reference: 'REQ-ENDO-001',
-            notes: 'Endocrinology department prescriptions'
-          }
-        ]
-      },
-      {
-        id: 'INV008',
-        name: 'X-Ray Film Sheets',
-        category: 'consumables',
-        currentStock: 85,
-        minStock: 25,
-        maxStock: 200,
-        unit: 'sheets',
-        costPerUnit: 2.80,
-        supplier: 'RadiologySupplies Co',
-        location: 'Radiology - Dark Room',
-        expiryDate: '2025-09-30',
-        batchNumber: 'XRAY2025',
-        description: 'High-quality X-ray film for diagnostic imaging',
-        status: 'in_stock',
-        lastUpdated: '2025-01-18T11:45:00',
-        transactions: [
-          {
-            type: 'usage',
-            quantity: -15,
-            date: '2025-01-18T11:45:00',
-            reference: 'REQ-RAD-001',
-            notes: 'Daily radiology procedures'
-          }
-        ]
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const HOSPITAL_ID = 'HOSP001'; // Using hospital_id for now
+    
+    // Global variables
+    let inventoryData = [];
+    let filteredData = null;
+    
+    // Fetch inventory data from API
+    async function fetchInventory() {
+      try {
+        console.log('Fetching inventory data...');
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/inventory`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          inventoryData = result.data.map(item => ({
+            id: item._id,
+            name: item.name,
+            category: item.category.toLowerCase(),
+            currentStock: item.current_stock,
+            minStock: item.min_stock,
+            maxStock: item.max_stock,
+            unit: item.unit,
+            costPerUnit: item.unit_price,
+            supplier: item.supplier,
+            location: item.location,
+            expiryDate: item.expiry_date ? item.expiry_date.split('T')[0] : '',
+            batchNumber: item.batch_number,
+            description: item.description,
+            status: item.status || (item.current_stock <= item.min_stock ? 'low_stock' : 'in_stock'),
+            lastUpdated: item.last_updated ? item.last_updated.split('T')[0] : '',
+            item_id: item.item_id,
+            manufacturer: item.manufacturer,
+            barcode: item.barcode,
+            reorder_level: item.reorder_level
+          }));
+          console.log('Inventory data loaded:', inventoryData.length, 'items');
+          return inventoryData;
+        } else {
+          throw new Error(result.error || 'Failed to fetch inventory data');
+        }
+      } catch (error) {
+        console.error('Error fetching inventory:', error);
+        inventoryData = [];
+        return [];
       }
-    ];
+    }
+    
+    // Fetch inventory statistics from API
+    async function fetchInventoryStatistics() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/inventory/stats`);
+        const result = await response.json();
+        
+        if (result.success) {
+          return result.data;
+        } else {
+          console.error('Failed to fetch inventory statistics:', result.error);
+          return getStatisticsFromData();
+        }
+      } catch (error) {
+        console.error('Error fetching inventory statistics:', error);
+        return getStatisticsFromData();
+      }
+    }
+    
+    // Calculate statistics from loaded data as fallback
+    function getStatisticsFromData() {
+      const totalItems = inventoryData.length;
+      const lowStockItems = inventoryData.filter(item => item.currentStock <= item.minStock).length;
+      const outOfStockItems = inventoryData.filter(item => item.currentStock === 0).length;
+      
+      // Calculate expiring items (next 30 days)
+      const today = new Date();
+      const thirtyDaysFromNow = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000));
+      const expiringItems = inventoryData.filter(item => {
+        if (!item.expiryDate) return false;
+        const expiryDate = new Date(item.expiryDate);
+        return expiryDate <= thirtyDaysFromNow;
+      }).length;
+      
+      // Category breakdown
+      const categoryBreakdown = {};
+      inventoryData.forEach(item => {
+        const category = item.category;
+        categoryBreakdown[category] = (categoryBreakdown[category] || 0) + 1;
+      });
+      
+      // Total value
+      const totalValue = inventoryData.reduce((sum, item) => {
+        return sum + (item.currentStock * item.costPerUnit);
+      }, 0);
+      
+      return {
+        total_items: totalItems,
+        low_stock_items: lowStockItems,
+        out_of_stock_items: outOfStockItems,
+        expiring_items: expiringItems,
+        total_value: totalValue,
+        category_breakdown: categoryBreakdown
+      };
+    }
+
+    // Static data removed - now using API data
+    // The inventory data is fetched from the API in the fetchInventory() function
+
 
     // Utility functions
     function formatCurrency(amount) {
@@ -1761,20 +1634,44 @@
     }
 
     // Initialize inventory system
-    function initializeInventory() {
-      updateInventoryStats();
-      updateCategoryOverview();
-      loadItemsGrid();
-      setupEventListeners();
-      populateStockUpdateDropdown();
+    async function initializeInventory() {
+      try {
+        console.log('Initializing inventory system...');
+        
+        // Fetch inventory data and statistics from API
+        await Promise.all([
+          fetchInventory(),
+          fetchInventoryStatistics()
+        ]);
+        
+        console.log('Inventory data loaded successfully');
+        
+        // Update UI components
+        updateInventoryStats();
+        updateCategoryOverview();
+        loadItemsGrid();
+        setupEventListeners();
+        populateStockUpdateDropdown();
+      } catch (error) {
+        console.error('Error initializing inventory:', error);
+        // Show error message to user
+        document.body.insertAdjacentHTML('afterbegin', `
+          <div style="background: #f8d7da; color: #721c24; padding: 10px; text-align: center; border: 1px solid #f5c6cb;">
+            Error loading inventory data. Please refresh the page.
+          </div>
+        `);
+      }
     }
 
     function updateInventoryStats() {
-      const totalItems = inventoryData.length;
-      const lowStockItems = inventoryData.filter(item => item.currentStock <= item.minStock).length;
-      const outOfStockItems = inventoryData.filter(item => item.currentStock === 0).length;
-      const expiringItems = inventoryData.filter(item => 
-        item.expiryDate && getDaysUntilExpiry(item.expiryDate) <= 30
+      // Use API data if available, fallback to empty array
+      const inventory = window.inventoryData || [];
+      
+      const totalItems = inventory.length;
+      const lowStockItems = inventory.filter(item => item.current_stock <= item.min_stock).length;
+      const outOfStockItems = inventory.filter(item => item.current_stock === 0).length;
+      const expiringItems = inventory.filter(item => 
+        item.expiry_date && getDaysUntilExpiry(item.expiry_date) <= 30
       ).length;
 
       document.getElementById('total-items').textContent = totalItems;
@@ -1784,13 +1681,16 @@
     }
 
     function updateCategoryOverview() {
+      // Use API data if available, fallback to empty array
+      const inventory = window.inventoryData || [];
+      
       const categoryStats = {};
-      inventoryData.forEach(item => {
+      inventory.forEach(item => {
         if (!categoryStats[item.category]) {
           categoryStats[item.category] = { count: 0, lowStock: 0 };
         }
         categoryStats[item.category].count++;
-        if (item.currentStock <= item.minStock) {
+        if (item.current_stock <= item.min_stock) {
           categoryStats[item.category].lowStock++;
         }
       });

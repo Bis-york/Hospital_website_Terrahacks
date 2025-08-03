@@ -40,6 +40,7 @@
       color: var(--primary);
       background: linear-gradient(45deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       font-size: 2.8em;
       margin-bottom: 30px;
@@ -944,185 +945,137 @@
   </div>
 
   <script>
-    // Sample patient data - in production this would come from API
-    const patientsData = [
-      {
-        id: 'PAT001',
-        firstName: 'John',
-        lastName: 'Smith',
-        age: 45,
-        gender: 'male',
-        phone: '555-0123',
-        emergencyContact: 'Jane Smith - 555-0124',
-        insurance: 'Blue Cross Blue Shield',
-        status: 'admitted',
-        admissionDate: '2025-01-20',
-        bedId: 'E001',
-        ward: 'Emergency',
-        admissionReason: 'Chest pain and shortness of breath',
-        priority: 'urgent',
-        attendingDoctor: 'Dr. Sarah Wilson',
-        notes: 'Stable condition, monitoring cardiac markers',
-        reports: [
-          {
-            id: 'RPT001',
-            type: 'consultation',
-            date: '2025-01-20T14:30:00',
-            doctor: 'Dr. Sarah Wilson',
-            department: 'cardiology',
-            content: 'Patient presented with acute chest pain. ECG shows mild ST elevation. Cardiac enzymes elevated. Started on aspirin and monitoring.',
-            recommendations: 'Continue cardiac monitoring, repeat ECG in 6 hours, cardiology consult tomorrow.'
-          },
-          {
-            id: 'RPT002',
-            type: 'lab-results',
-            date: '2025-01-20T16:45:00',
-            doctor: 'Lab Technician',
-            department: 'laboratory',
-            content: 'Troponin I: 2.5 ng/mL (elevated), CK-MB: 8.2 ng/mL (elevated), Complete Blood Count: Normal, Basic Metabolic Panel: Normal',
-            recommendations: 'Serial cardiac markers recommended'
-          }
-        ]
-      },
-      {
-        id: 'PAT002',
-        firstName: 'Maria',
-        lastName: 'Garcia',
-        age: 32,
-        gender: 'female',
-        phone: '555-0456',
-        emergencyContact: 'Carlos Garcia - 555-0457',
-        insurance: 'Aetna',
-        status: 'critical',
-        admissionDate: '2025-01-19',
-        bedId: 'I001',
-        ward: 'ICU',
-        admissionReason: 'Severe pneumonia with respiratory failure',
-        priority: 'critical',
-        attendingDoctor: 'Dr. Michael Chen',
-        notes: 'On ventilator support, improving slowly',
-        reports: [
-          {
-            id: 'RPT003',
-            type: 'radiology',
-            date: '2025-01-19T10:15:00',
-            doctor: 'Dr. Emily Roberts',
-            department: 'radiology',
-            content: 'Chest X-ray shows bilateral pneumonia with consolidation in both lower lobes. No pneumothorax identified.',
-            recommendations: 'Follow-up chest X-ray in 48 hours'
-          },
-          {
-            id: 'RPT004',
-            type: 'consultation',
-            date: '2025-01-21T08:00:00',
-            doctor: 'Dr. Michael Chen',
-            department: 'emergency',
-            content: 'Patient showing gradual improvement. Ventilator settings reduced. O2 saturation stable at 94-96%.',
-            recommendations: 'Continue current antibiotic regimen, plan extubation trial tomorrow if stable'
-          }
-        ]
-      },
-      {
-        id: 'PAT003',
-        firstName: 'Robert',
-        lastName: 'Johnson',
-        age: 67,
-        gender: 'male',
-        phone: '555-0789',
-        emergencyContact: 'Linda Johnson - 555-0790',
-        insurance: 'Medicare',
-        status: 'admitted',
-        admissionDate: '2025-01-21',
-        bedId: 'G001',
-        ward: 'General',
-        admissionReason: 'Hip fracture post fall',
-        priority: 'normal',
-        attendingDoctor: 'Dr. Amanda Lee',
-        notes: 'Post-operative recovery, pain managed',
-        reports: [
-          {
-            id: 'RPT005',
-            type: 'surgery',
-            date: '2025-01-21T11:30:00',
-            doctor: 'Dr. Amanda Lee',
-            department: 'orthopedics',
-            content: 'Successful open reduction and internal fixation of right hip fracture. Surgery completed without complications.',
-            recommendations: 'Post-op care, physical therapy to begin in 2 days, weight bearing as tolerated'
-          }
-        ]
-      },
-      {
-        id: 'PAT004',
-        firstName: 'Emma',
-        lastName: 'Davis',
-        age: 28,
-        gender: 'female',
-        phone: '555-0321',
-        emergencyContact: 'Tom Davis - 555-0322',
-        insurance: 'United Healthcare',
-        status: 'discharged',
-        admissionDate: '2025-01-18',
-        dischargeDate: '2025-01-20',
-        bedId: null,
-        ward: 'General',
-        admissionReason: 'Appendectomy',
-        priority: 'urgent',
-        attendingDoctor: 'Dr. Kevin Park',
-        notes: 'Successful laparoscopic appendectomy, recovered well',
-        reports: [
-          {
-            id: 'RPT006',
-            type: 'surgery',
-            date: '2025-01-18T15:45:00',
-            doctor: 'Dr. Kevin Park',
-            department: 'surgery',
-            content: 'Laparoscopic appendectomy completed successfully. Appendix removed intact, no complications.',
-            recommendations: 'Standard post-op recovery, clear diet advancing to regular'
-          },
-          {
-            id: 'RPT007',
-            type: 'discharge',
-            date: '2025-01-20T10:00:00',
-            doctor: 'Dr. Kevin Park',
-            department: 'surgery',
-            content: 'Patient recovered well from laparoscopic appendectomy. Wound healing appropriately, no signs of infection.',
-            recommendations: 'Follow up in 1 week, avoid heavy lifting for 2 weeks, return if fever or increased pain'
-          }
-        ]
-      },
-      {
-        id: 'PAT005',
-        firstName: 'David',
-        lastName: 'Wilson',
-        age: 55,
-        gender: 'male',
-        phone: '555-0654',
-        emergencyContact: 'Sarah Wilson - 555-0655',
-        insurance: 'Cigna',
-        status: 'admitted',
-        admissionDate: '2025-01-22',
-        bedId: 'G003',
-        ward: 'General',
-        admissionReason: 'Diabetes management and foot infection',
-        priority: 'normal',
-        attendingDoctor: 'Dr. Lisa Brown',
-        notes: 'Blood sugar stabilizing, wound improving',
-        reports: [
-          {
-            id: 'RPT008',
-            type: 'consultation',
-            date: '2025-01-22T09:15:00',
-            doctor: 'Dr. Lisa Brown',
-            department: 'emergency',
-            content: 'Diabetic patient with infected foot ulcer. Blood glucose elevated at 350 mg/dL. Started on IV antibiotics.',
-            recommendations: 'Insulin protocol, wound care, endocrine consult'
-          }
-        ]
-      }
-    ];
+    // API Configuration
+    const API_BASE_URL = 'http://localhost:5000/api';
+    const HOSPITAL_ID = 'HOSP001'; // Using hospital_id for now
 
+    // Patient data will be loaded from API
+    let patientsData = [];
     let selectedPatient = null;
     let searchTimeout = null;
+
+    // API Functions
+    async function fetchPatients() {
+      try {
+        console.log('Fetching patients from API...');
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/patients`);
+        const result = await response.json();
+        
+        if (result.success) {
+          patientsData = result.data;
+          console.log(`Loaded ${patientsData.length} patients from API`);
+          updateStatistics();
+          loadDischargePatients();
+          return patientsData;
+        } else {
+          console.error('Failed to fetch patients:', result.error);
+          showNotification('Failed to load patients: ' + result.error, 'error');
+          return [];
+        }
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        showNotification('Error connecting to API: ' + error.message, 'error');
+        return [];
+      }
+    }
+
+    async function fetchPatientStatistics() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/patients`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const patients = result.data;
+          
+          // Calculate statistics
+          const stats = {
+            total: patients.length,
+            admitted: patients.filter(p => p.status === 'admitted').length,
+            discharged: patients.filter(p => {
+              const today = new Date().toISOString().split('T')[0];
+              return p.status === 'discharged' && 
+                     p.discharge_date && 
+                     p.discharge_date.split('T')[0] === today;
+            }).length,
+            critical: patients.filter(p => p.status === 'critical' || 
+                                           (p.diagnosis && p.diagnosis.toLowerCase().includes('critical'))).length
+          };
+          
+          return stats;
+        }
+      } catch (error) {
+        console.error('Error fetching patient statistics:', error);
+        return { total: 0, admitted: 0, discharged: 0, critical: 0 };
+      }
+    }
+
+    async function admitPatientToAPI(patientData) {
+      try {
+        console.log('Admitting patient to API...');
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/patients`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(patientData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Patient admitted successfully:', result.patient_id);
+          return result.patient_id;
+        } else {
+          console.error('Failed to admit patient:', result.error);
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        console.error('Error admitting patient:', error);
+        throw error;
+      }
+    }
+
+    async function dischargePatientFromAPI(patientId) {
+      try {
+        console.log('Discharging patient from API...');
+        const response = await fetch(`${API_BASE_URL}/patients/${patientId}/discharge`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('Patient discharged successfully');
+          return true;
+        } else {
+          console.error('Failed to discharge patient:', result.error);
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        console.error('Error discharging patient:', error);
+        throw error;
+      }
+    }
+
+    async function fetchAvailableBeds() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals/${HOSPITAL_ID}/beds`);
+        const result = await response.json();
+        
+        if (result.success) {
+          return result.data.filter(bed => bed.status === 'available');
+        } else {
+          console.error('Failed to fetch beds:', result.error);
+          return [];
+        }
+      } catch (error) {
+        console.error('Error fetching beds:', error);
+        return [];
+      }
+    }
 
     // Sidebar functionality
     const menuBtn = document.getElementById('menu-btn');
@@ -1143,7 +1096,7 @@
     });
 
     // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
       console.log('Patient Management page loaded');
       
       // Set default report date to now
@@ -1153,9 +1106,14 @@
       
       // Event listeners
       setupEventListeners();
-      updateStatistics();
-      loadDischargePatients();
-      loadAvailableBeds();
+      
+      // Load data from API
+      showNotification('Loading patient data...', 'info');
+      await fetchPatients();
+      await updateStatisticsFromAPI();
+      await loadDischargePatients();
+      await loadAvailableBeds();
+      showNotification('Patient data loaded successfully!', 'success');
     });
 
     function setupEventListeners() {
@@ -1198,9 +1156,8 @@
         }
         
         const results = patientsData.filter(patient => 
-          patient.firstName.toLowerCase().includes(query) ||
-          patient.lastName.toLowerCase().includes(query) ||
-          patient.id.toLowerCase().includes(query) ||
+          patient.name.toLowerCase().includes(query) ||
+          patient.patient_id.toLowerCase().includes(query) ||
           patient.phone.includes(query)
         );
         
@@ -1215,9 +1172,9 @@
         dropdown.innerHTML = '<div class="search-item">No patients found</div>';
       } else {
         dropdown.innerHTML = results.map(patient => `
-          <div class="search-item" onclick="selectPatient('${patient.id}')">
-            <div class="patient-name">${patient.firstName} ${patient.lastName}</div>
-            <div class="patient-info">ID: ${patient.id} | ${patient.age}y ${patient.gender} | ${patient.status}</div>
+          <div class="search-item" onclick="selectPatient('${patient.patient_id}')">
+            <div class="patient-name">${patient.name}</div>
+            <div class="patient-info">ID: ${patient.patient_id} | ${patient.age}y ${patient.gender} | ${patient.status}</div>
           </div>
         `).join('');
       }
@@ -1226,12 +1183,12 @@
     }
 
     function selectPatient(patientId) {
-      const patient = patientsData.find(p => p.id === patientId);
+      const patient = patientsData.find(p => p.patient_id === patientId);
       if (patient) {
         selectedPatient = patient;
         displayPatientDetails(patient);
         hideSearchDropdown();
-        document.getElementById('patient-search-input').value = `${patient.firstName} ${patient.lastName}`;
+        document.getElementById('patient-search-input').value = patient.name;
       }
     }
 
@@ -1243,9 +1200,14 @@
       const reportsGrid = document.getElementById('reports-grid');
       
       // Update header
-      title.textContent = `${patient.firstName} ${patient.lastName} (${patient.id})`;
+      title.textContent = `${patient.name} (${patient.patient_id})`;
       statusBadge.textContent = patient.status.charAt(0).toUpperCase() + patient.status.slice(1);
       statusBadge.className = `patient-status status-${patient.status}`;
+      
+      // Parse emergency contact
+      const emergencyContact = patient.emergency_contact ? 
+        `${patient.emergency_contact.name || 'N/A'} - ${patient.emergency_contact.phone || 'N/A'}` : 
+        'N/A';
       
       // Update patient information
       infoGrid.innerHTML = `
@@ -1253,7 +1215,7 @@
           <h4>👤 Personal Information</h4>
           <div class="info-item">
             <span class="info-label">Full Name:</span>
-            <span class="info-value">${patient.firstName} ${patient.lastName}</span>
+            <span class="info-value">${patient.name}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Age:</span>
@@ -1268,8 +1230,12 @@
             <span class="info-value">${patient.phone}</span>
           </div>
           <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">${patient.email || 'N/A'}</span>
+          </div>
+          <div class="info-item">
             <span class="info-label">Emergency Contact:</span>
-            <span class="info-value">${patient.emergencyContact}</span>
+            <span class="info-value">${emergencyContact}</span>
           </div>
         </div>
         
@@ -1277,7 +1243,11 @@
           <h4>🏥 Medical Information</h4>
           <div class="info-item">
             <span class="info-label">Patient ID:</span>
-            <span class="info-value">${patient.id}</span>
+            <span class="info-value">${patient.patient_id}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Medical Record Number:</span>
+            <span class="info-value">${patient.medical_record_number || 'N/A'}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Status:</span>
@@ -1285,77 +1255,95 @@
           </div>
           <div class="info-item">
             <span class="info-label">Admission Date:</span>
-            <span class="info-value">${new Date(patient.admissionDate).toLocaleDateString()}</span>
+            <span class="info-value">${new Date(patient.admission_date).toLocaleDateString()}</span>
           </div>
-          ${patient.dischargeDate ? `
+          ${patient.discharge_date ? `
             <div class="info-item">
               <span class="info-label">Discharge Date:</span>
-              <span class="info-value">${new Date(patient.dischargeDate).toLocaleDateString()}</span>
+              <span class="info-value">${new Date(patient.discharge_date).toLocaleDateString()}</span>
             </div>
           ` : ''}
-          <div class="info-item">
-            <span class="info-label">Ward:</span>
-            <span class="info-value">${patient.ward}</span>
-          </div>
-          ${patient.bedId ? `
+          ${patient.bed_info && patient.bed_info.department ? `
+            <div class="info-item">
+              <span class="info-label">Department:</span>
+              <span class="info-value">${patient.bed_info.department}</span>
+            </div>
+          ` : ''}
+          ${patient.bed_info && patient.bed_info.bed_number ? `
             <div class="info-item">
               <span class="info-label">Bed:</span>
-              <span class="info-value">${patient.bedId}</span>
+              <span class="info-value">${patient.bed_info.bed_number}</span>
+            </div>
+          ` : ''}
+          ${patient.bed_info && patient.bed_info.room_number ? `
+            <div class="info-item">
+              <span class="info-label">Room:</span>
+              <span class="info-value">${patient.bed_info.room_number}</span>
             </div>
           ` : ''}
         </div>
         
         <div class="info-card">
-          <h4>💼 Administrative</h4>
+          <h4>💼 Medical Details</h4>
           <div class="info-item">
-            <span class="info-label">Insurance:</span>
-            <span class="info-value">${patient.insurance}</span>
+            <span class="info-label">Diagnosis:</span>
+            <span class="info-value">${patient.diagnosis || 'N/A'}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Attending Doctor:</span>
-            <span class="info-value">${patient.attendingDoctor}</span>
+            <span class="info-label">Treatment Plan:</span>
+            <span class="info-value">${patient.treatment_plan || 'N/A'}</span>
           </div>
-          <div class="info-item">
-            <span class="info-label">Priority:</span>
-            <span class="info-value">${patient.priority.charAt(0).toUpperCase() + patient.priority.slice(1)}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Admission Reason:</span>
-            <span class="info-value">${patient.admissionReason}</span>
-          </div>
-          ${patient.notes ? `
+          ${patient.medications && patient.medications.length > 0 ? `
             <div class="info-item">
-              <span class="info-label">Notes:</span>
-              <span class="info-value">${patient.notes}</span>
+              <span class="info-label">Medications:</span>
+              <span class="info-value">${patient.medications.join(', ')}</span>
+            </div>
+          ` : ''}
+          ${patient.allergies && patient.allergies.length > 0 ? `
+            <div class="info-item">
+              <span class="info-label">Allergies:</span>
+              <span class="info-value">${patient.allergies.join(', ')}</span>
+            </div>
+          ` : ''}
+          ${patient.medical_history && patient.medical_history.length > 0 ? `
+            <div class="info-item">
+              <span class="info-label">Medical History:</span>
+              <span class="info-value">${patient.medical_history.join(', ')}</span>
+            </div>
+          ` : ''}
+        </div>
+        
+        <div class="info-card">
+          <h4>📋 Reports</h4>
+          ${patient.doctor_report ? `
+            <div class="info-item">
+              <span class="info-label">Doctor Report:</span>
+              <span class="info-value">${patient.doctor_report}</span>
+            </div>
+          ` : ''}
+          ${patient.incident_report ? `
+            <div class="info-item">
+              <span class="info-label">Incident Report:</span>
+              <span class="info-value">${patient.incident_report}</span>
             </div>
           ` : ''}
         </div>
       `;
       
-      // Update medical reports
-      if (patient.reports && patient.reports.length > 0) {
-        reportsGrid.innerHTML = patient.reports.map(report => `
-          <div class="report-card">
-            <div class="report-header">
-              <span class="report-type">${report.type.replace('-', ' ').toUpperCase()}</span>
-              <span class="report-date">${new Date(report.date).toLocaleDateString()}</span>
-            </div>
-            <div class="report-content">
-              <strong>Doctor:</strong> ${report.doctor}<br>
-              <strong>Department:</strong> ${report.department.charAt(0).toUpperCase() + report.department.slice(1)}<br><br>
-              <strong>Report:</strong><br>
-              ${report.content}<br><br>
-              ${report.recommendations ? `<strong>Recommendations:</strong><br>${report.recommendations}` : ''}
-            </div>
+      // For now, show a simple message for medical reports since we don't have structured reports in API yet
+      reportsGrid.innerHTML = `
+        <div class="report-card">
+          <div class="report-content">
+            <strong>Medical records and detailed reports are stored in the patient management system.</strong><br><br>
+            ${patient.doctor_report ? `<strong>Latest Doctor Report:</strong><br>${patient.doctor_report}<br><br>` : ''}
+            ${patient.incident_report ? `<strong>Incident Report:</strong><br>${patient.incident_report}` : ''}
           </div>
-        `).join('');
-      } else {
-        reportsGrid.innerHTML = '<div class="report-card"><div class="report-content">No medical reports available.</div></div>';
-      }
+        </div>
+      `;
       
       // Show/hide action buttons based on status
       const dischargeBtn = document.getElementById('discharge-selected-btn');
-      if (patient.status === 'admitted' || patient.status === 'critical') {
+      if (patient.status === 'admitted') {
         dischargeBtn.style.display = 'inline-block';
       } else {
         dischargeBtn.style.display = 'none';
@@ -1364,12 +1352,30 @@
       detailsSection.classList.add('show');
     }
 
+    async function updateStatisticsFromAPI() {
+      try {
+        const stats = await fetchPatientStatistics();
+        document.getElementById('total-patients').textContent = stats.total;
+        document.getElementById('admitted-patients').textContent = stats.admitted;
+        document.getElementById('discharged-today').textContent = stats.discharged;
+        document.getElementById('critical-patients').textContent = stats.critical;
+      } catch (error) {
+        console.error('Error updating statistics:', error);
+      }
+    }
+
     function updateStatistics() {
       const stats = {
         total: patientsData.length,
-        admitted: patientsData.filter(p => p.status === 'admitted' || p.status === 'critical').length,
-        discharged: patientsData.filter(p => p.status === 'discharged' && p.dischargeDate === new Date().toISOString().split('T')[0]).length,
-        critical: patientsData.filter(p => p.status === 'critical').length
+        admitted: patientsData.filter(p => p.status === 'admitted').length,
+        discharged: patientsData.filter(p => {
+          const today = new Date().toISOString().split('T')[0];
+          return p.status === 'discharged' && 
+                 p.discharge_date && 
+                 p.discharge_date.split('T')[0] === today;
+        }).length,
+        critical: patientsData.filter(p => p.status === 'critical' || 
+                                           (p.diagnosis && p.diagnosis.toLowerCase().includes('critical'))).length
       };
       
       document.getElementById('total-patients').textContent = stats.total;
@@ -1378,23 +1384,28 @@
       document.getElementById('critical-patients').textContent = stats.critical;
     }
 
-    function loadDischargePatients() {
+    async function loadDischargePatients() {
       const select = document.getElementById('discharge-patient-select');
-      const admittedPatients = patientsData.filter(p => p.status === 'admitted' || p.status === 'critical');
+      const admittedPatients = patientsData.filter(p => p.status === 'admitted');
       
       select.innerHTML = '<option value="">Select Patient to Discharge</option>' +
         admittedPatients.map(p => 
-          `<option value="${p.id}">${p.firstName} ${p.lastName} (${p.id}) - ${p.ward}</option>`
+          `<option value="${p.patient_id}">${p.name} (${p.patient_id}) - ${p.bed_info?.department || 'No Department'}</option>`
         ).join('');
     }
 
-    function loadAvailableBeds() {
-      // This would normally fetch from bed management API
-      const availableBeds = ['E002', 'E007', 'E008', 'G002', 'G004', 'G007', 'G008', 'I003', 'I007'];
-      const select = document.getElementById('assigned-bed');
-      
-      select.innerHTML = '<option value="">Select Available Bed</option>' +
-        availableBeds.map(bed => `<option value="${bed}">${bed}</option>`).join('');
+    async function loadAvailableBeds() {
+      try {
+        const availableBeds = await fetchAvailableBeds();
+        const select = document.getElementById('assigned-bed');
+        
+        select.innerHTML = '<option value="">Select Available Bed</option>' +
+          availableBeds.map(bed => `<option value="${bed.bed_number}">${bed.bed_number} (${bed.department})</option>`).join('');
+      } catch (error) {
+        console.error('Error loading available beds:', error);
+        const select = document.getElementById('assigned-bed');
+        select.innerHTML = '<option value="">No beds available</option>';
+      }
     }
 
     function showModal(modalId) {
@@ -1528,46 +1539,46 @@
       document.getElementById('report-date').value = new Date().toISOString().slice(0, 16);
     }
 
-    function handleDischargeSubmit(e) {
+    async function handleDischargeSubmit(e) {
       e.preventDefault();
       
       const patientId = document.getElementById('discharge-patient-select').value;
-      const patient = patientsData.find(p => p.id === patientId);
+      const patient = patientsData.find(p => p.patient_id === patientId);
       
-      if (!patient) return;
-      
-      // Update patient status
-      patient.status = 'discharged';
-      patient.dischargeDate = document.getElementById('discharge-date').value.split('T')[0];
-      patient.bedId = null;
-      
-      // Add discharge report
-      const dischargeReport = {
-        id: `RPT${Date.now()}`,
-        type: 'discharge',
-        date: document.getElementById('discharge-date').value,
-        doctor: patient.attendingDoctor,
-        department: patient.ward.toLowerCase(),
-        content: `Patient discharged in ${document.getElementById('discharge-condition').value} condition. ${document.getElementById('discharge-notes').value}`,
-        recommendations: document.getElementById('followup-instructions').value
-      };
-      
-      if (!patient.reports) patient.reports = [];
-      patient.reports.unshift(dischargeReport);
-      
-      // Refresh data
-      updateStatistics();
-      loadDischargePatients();
-      
-      if (selectedPatient && selectedPatient.id === patientId) {
-        displayPatientDetails(patient);
+      if (!patient) {
+        showNotification('Patient not found', 'error');
+        return;
       }
       
-      hideModal('discharge-modal');
-      showNotification(`Patient ${patient.firstName} ${patient.lastName} discharged successfully!`, 'success');
-      
-      // Reset form
-      document.getElementById('discharge-form').reset();
+      try {
+        showNotification('Processing discharge...', 'info');
+        
+        // Call API to discharge patient
+        await dischargePatientFromAPI(patient._id || patient.patient_id);
+        
+        // Update local patient status
+        patient.status = 'discharged';
+        patient.discharge_date = document.getElementById('discharge-date').value;
+        patient.bed_id = null;
+        
+        // Refresh data from API
+        await fetchPatients();
+        await updateStatisticsFromAPI();
+        await loadDischargePatients();
+        
+        if (selectedPatient && selectedPatient.patient_id === patientId) {
+          displayPatientDetails(patient);
+        }
+        
+        hideModal('discharge-modal');
+        showNotification(`Patient ${patient.name} discharged successfully!`, 'success');
+        
+        // Reset form
+        document.getElementById('discharge-form').reset();
+      } catch (error) {
+        console.error('Error discharging patient:', error);
+        showNotification('Failed to discharge patient: ' + error.message, 'error');
+      }
     }
 
     function dischargeSelectedPatient() {
@@ -1577,7 +1588,7 @@
       }
       
       // Pre-populate discharge form
-      document.getElementById('discharge-patient-select').value = selectedPatient.id;
+      document.getElementById('discharge-patient-select').value = selectedPatient.patient_id;
       showModal('discharge-modal');
     }
 

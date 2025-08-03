@@ -151,6 +151,7 @@ class PatientDataDB:
     
     def get_patients_by_hospital(self, hospital_id):
         """Get patients currently in a specific hospital"""
+        # Simple approach - just find by current_hospital field
         patients = list(self.patients_collection.find({'current_hospital': hospital_id, 'status': 'admitted'}))
         for patient in patients:
             patient['_id'] = str(patient['_id'])

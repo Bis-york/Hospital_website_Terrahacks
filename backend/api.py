@@ -11,8 +11,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from hospital import HospitalManagementSystem
 from hospital_beds import HospitalBedsDB
 from patient_data import PatientDataDB
-from med_inv import MedicalInventoryDB
-from staff_inv import StaffManagementDB
+from staff_data import staff_manager
+from inventory_data import inventory_manager
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -208,18 +208,22 @@ def get_hospital_patients(hospital_id):
         patients = hms.get_hospital_patients(hospital_id)
         # Convert datetime objects to strings
         for patient in patients:
-            if 'created_at' in patient:
-                patient['created_at'] = patient['created_at'].isoformat()
-            if 'updated_at' in patient:
-                patient['updated_at'] = patient['updated_at'].isoformat()
-            if 'admission_history' in patient:
+            # Handle datetime fields
+            for field in ['created_at', 'updated_at', 'admission_date', 'discharge_date']:
+                if field in patient and patient[field] is not None:
+                    if hasattr(patient[field], 'isoformat'):
+                        patient[field] = patient[field].isoformat()
+            
+            # Handle admission history
+            if 'admission_history' in patient and patient['admission_history']:
                 for admission in patient['admission_history']:
-                    if 'admission_date' in admission:
-                        admission['admission_date'] = admission['admission_date'].isoformat()
-                    if 'discharge_date' in admission:
-                        admission['discharge_date'] = admission['discharge_date'].isoformat()
+                    for field in ['admission_date', 'discharge_date']:
+                        if field in admission and admission[field] is not None:
+                            if hasattr(admission[field], 'isoformat'):
+                                admission[field] = admission[field].isoformat()
         return jsonify({'success': True, 'data': patients})
     except Exception as e:
+        print(f"Error in get_hospital_patients: {e}")  # Debug print
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/hospitals/<hospital_id>/patients', methods=['POST'])
@@ -274,16 +278,29 @@ def discharge_patient(patient_id):
 def get_hospital_staff(hospital_id):
     """Get all staff for a hospital"""
     try:
-        staff = hms.get_hospital_staff(hospital_id)
-        # Convert datetime objects to strings
-        for member in staff:
-            if 'created_at' in member:
-                member['created_at'] = member['created_at'].isoformat()
-            if 'updated_at' in member:
-                member['updated_at'] = member['updated_at'].isoformat()
-            if 'last_login' in member and member['last_login']:
-                member['last_login'] = member['last_login'].isoformat()
+        print(f"Debug: Fetching staff for hospital_id: {hospital_id}")
+        staff = staff_manager.get_staff_by_hospital(hospital_id)
+        print(f"Debug: Found {len(staff)} staff members")
         return jsonify({'success': True, 'data': staff})
+    except Exception as e:
+        print(f"Debug: Error fetching staff: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/staff/department/<department>', methods=['GET'])
+def get_staff_by_department(hospital_id, department):
+    """Get staff by department"""
+    try:
+        staff = staff_manager.get_staff_by_department(hospital_id, department)
+        return jsonify({'success': True, 'data': staff})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/staff/stats', methods=['GET'])
+def get_staff_statistics(hospital_id):
+    """Get staff statistics for a hospital"""
+    try:
+        stats = staff_manager.get_staff_statistics(hospital_id)
+        return jsonify({'success': True, 'data': stats})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -292,10 +309,23 @@ def add_staff(hospital_id):
     """Add staff member to a hospital"""
     try:
         data = request.get_json()
-        staff_id = hms.add_staff_to_hospital(hospital_id, data)
+        data['hospital_id'] = hospital_id
+        staff_id = staff_manager.add_staff_member(data)
         return jsonify({'success': True, 'staff_id': staff_id}), 201
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/staff/<staff_id>', methods=['GET'])
+def get_staff_member(staff_id):
+    """Get a specific staff member"""
+    try:
+        staff = staff_manager.get_staff_by_id(staff_id)
+        if staff:
+            return jsonify({'success': True, 'data': staff})
+        else:
+            return jsonify({'success': False, 'error': 'Staff member not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/staff/<staff_id>/status', methods=['PUT'])
 def update_staff_status(staff_id):
@@ -303,7 +333,7 @@ def update_staff_status(staff_id):
     try:
         data = request.get_json()
         status = data.get('status')
-        success = hms.staff_db.update_staff_status(staff_id, status)
+        success = staff_manager.update_staff_status(staff_id, status)
         if success:
             return jsonify({'success': True, 'message': 'Staff status updated successfully'})
         else:
@@ -311,25 +341,16 @@ def update_staff_status(staff_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/staff/login', methods=['POST'])
-def staff_login():
-    """Staff login"""
+@app.route('/api/staff/<staff_id>', methods=['PUT'])
+def update_staff_member(staff_id):
+    """Update staff member information"""
     try:
         data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
-        staff = hms.staff_db.authenticate_staff(email, password)
-        if staff:
-            # Convert datetime objects to strings
-            if 'created_at' in staff:
-                staff['created_at'] = staff['created_at'].isoformat()
-            if 'updated_at' in staff:
-                staff['updated_at'] = staff['updated_at'].isoformat()
-            if 'last_login' in staff and staff['last_login']:
-                staff['last_login'] = staff['last_login'].isoformat()
-            return jsonify({'success': True, 'data': staff})
+        success = staff_manager.update_staff_member(staff_id, data)
+        if success:
+            return jsonify({'success': True, 'message': 'Staff member updated successfully'})
         else:
-            return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+            return jsonify({'success': False, 'error': 'Staff member not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -339,16 +360,49 @@ def staff_login():
 def get_hospital_inventory(hospital_id):
     """Get all inventory for a hospital"""
     try:
-        inventory = hms.get_hospital_inventory(hospital_id)
-        # Convert datetime objects to strings
-        for item in inventory:
-            if 'created_at' in item:
-                item['created_at'] = item['created_at'].isoformat()
-            if 'updated_at' in item:
-                item['updated_at'] = item['updated_at'].isoformat()
-            if 'expiry_date' in item and item['expiry_date']:
-                item['expiry_date'] = item['expiry_date'].isoformat()
+        print(f"Debug: Fetching inventory for hospital_id: {hospital_id}")
+        category = request.args.get('category')
+        inventory = inventory_manager.get_inventory_by_hospital(hospital_id, category)
+        print(f"Debug: Found {len(inventory)} inventory items")
         return jsonify({'success': True, 'data': inventory})
+    except Exception as e:
+        print(f"Debug: Error fetching inventory: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/inventory/category/<category>', methods=['GET'])
+def get_inventory_by_category(hospital_id, category):
+    """Get inventory by category"""
+    try:
+        inventory = inventory_manager.get_inventory_by_category(hospital_id, category)
+        return jsonify({'success': True, 'data': inventory})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/inventory/stats', methods=['GET'])
+def get_inventory_statistics(hospital_id):
+    """Get inventory statistics for a hospital"""
+    try:
+        stats = inventory_manager.get_inventory_statistics(hospital_id)
+        return jsonify({'success': True, 'data': stats})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/inventory/low-stock', methods=['GET'])
+def get_low_stock_items(hospital_id):
+    """Get low stock items for a hospital"""
+    try:
+        items = inventory_manager.get_low_stock_items(hospital_id)
+        return jsonify({'success': True, 'data': items})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/inventory/expiring', methods=['GET'])
+def get_expiring_items(hospital_id):
+    """Get expiring items for a hospital"""
+    try:
+        days_ahead = request.args.get('days', 30, type=int)
+        items = inventory_manager.get_expiring_items(hospital_id, days_ahead)
+        return jsonify({'success': True, 'data': items})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -358,47 +412,59 @@ def add_inventory_item(hospital_id):
     try:
         data = request.get_json()
         data['hospital_id'] = hospital_id
-        item_id = hms.inventory_db.create_inventory_item(data)
+        item_id = inventory_manager.add_inventory_item(data)
         return jsonify({'success': True, 'item_id': item_id}), 201
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/inventory/<item_id>', methods=['GET'])
+def get_inventory_item(item_id):
+    """Get a specific inventory item"""
+    try:
+        item = inventory_manager.get_item_by_id(item_id)
+        if item:
+            return jsonify({'success': True, 'data': item})
+        else:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/inventory/<item_id>/stock', methods=['PUT'])
 def update_inventory_stock(item_id):
     """Update inventory stock"""
     try:
         data = request.get_json()
-        quantity = data.get('quantity')
-        operation = data.get('operation', 'set')  # 'set', 'add', 'subtract'
-        
-        if operation == 'add':
-            success = hms.inventory_db.add_stock(item_id, quantity)
-        elif operation == 'subtract':
-            success = hms.inventory_db.use_stock(item_id, quantity)
-        else:  # set
-            success = hms.inventory_db.update_stock(item_id, quantity)
-        
+        new_stock = data.get('current_stock')
+        success = inventory_manager.update_stock_level(item_id, new_stock)
         if success:
             return jsonify({'success': True, 'message': 'Stock updated successfully'})
         else:
-            return jsonify({'success': False, 'error': 'Item not found or insufficient stock'}), 404
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/hospitals/<hospital_id>/inventory/low-stock', methods=['GET'])
-def get_low_stock_items(hospital_id):
-    """Get low stock items for a hospital"""
+@app.route('/api/inventory/<item_id>', methods=['PUT'])
+def update_inventory_item(item_id):
+    """Update inventory item information"""
     try:
-        items = hms.inventory_db.get_low_stock_items_by_hospital(hospital_id)
-        # Convert datetime objects to strings
-        for item in items:
-            if 'created_at' in item:
-                item['created_at'] = item['created_at'].isoformat()
-            if 'updated_at' in item:
-                item['updated_at'] = item['updated_at'].isoformat()
-            if 'expiry_date' in item and item['expiry_date']:
-                item['expiry_date'] = item['expiry_date'].isoformat()
-        return jsonify({'success': True, 'data': items})
+        data = request.get_json()
+        success = inventory_manager.update_inventory_item(item_id, data)
+        if success:
+            return jsonify({'success': True, 'message': 'Item updated successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/inventory/<item_id>', methods=['DELETE'])
+def delete_inventory_item(item_id):
+    """Delete an inventory item"""
+    try:
+        success = inventory_manager.delete_inventory_item(item_id)
+        if success:
+            return jsonify({'success': True, 'message': 'Item deleted successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

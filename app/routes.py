@@ -15,6 +15,18 @@ db = HospitalBedsDB()
 def index():
     return render_template('index.html')
 
+@main.route('/patients')
+def patients():
+    return render_template('patients.html')
+
+@main.route('/staff')
+def staff():
+    return render_template('staff.html')
+
+@main.route('/inventory')
+def inventory():
+    return render_template('inventory.html')
+
 @main.route('/api/beds', methods=['GET'])
 def get_beds():
     """Get all beds or filter by status/department"""
