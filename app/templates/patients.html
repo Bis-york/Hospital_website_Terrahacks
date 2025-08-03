@@ -129,6 +129,11 @@
       transform: translateY(-2px);
     }
 
+    .menu-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .overlay {
       position: fixed;
       top: 0;
@@ -1087,12 +1092,14 @@
       sidebar.classList.toggle('open');
       overlay.classList.toggle('show');
       mainContent.classList.toggle('shifted');
+      menuBtn.classList.toggle('hidden');
     });
 
     overlay.addEventListener('click', function() {
       sidebar.classList.remove('open');
       overlay.classList.remove('show');
       mainContent.classList.remove('shifted');
+      menuBtn.classList.remove('hidden');
     });
 
     // Initialize page

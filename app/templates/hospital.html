@@ -52,20 +52,28 @@
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 12px 16px;
+            border-radius: 8px;
             cursor: pointer;
             z-index: 1001;
             font-size: 18px;
+            box-shadow: 0 4px 12px rgba(106, 154, 196, 0.3);
+            transition: all 0.3s ease;
         }
 
         .menu-btn:hover {
             background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .menu-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
         .sidebar {
             position: fixed;
-            left: 250px;
+            left: -250px;
             top: 0;
             width: 250px;
             height: 100vh;
@@ -257,12 +265,14 @@
             sidebar.classList.toggle('open');
             overlay.classList.toggle('show');
             mainContent.classList.toggle('shifted');
+            menuBtn.classList.toggle('hidden');
         });
 
         overlay.addEventListener('click', function() {
             sidebar.classList.remove('open');
             overlay.classList.remove('show');
             mainContent.classList.remove('shifted');
+            menuBtn.classList.remove('hidden');
         });
     </script>
 </body>
