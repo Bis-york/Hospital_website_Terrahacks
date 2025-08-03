@@ -121,6 +121,15 @@ def get_hospital_beds(hospital_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/hospitals/<hospital_id>/departments', methods=['GET'])
+def get_hospital_departments(hospital_id):
+    """Get all departments for a hospital"""
+    try:
+        departments = hms.beds_db.get_departments_by_hospital(hospital_id)
+        return jsonify({'success': True, 'data': departments})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/hospitals/<hospital_id>/beds', methods=['POST'])
 def create_bed(hospital_id):
     """Create a new bed in a hospital"""
@@ -142,6 +151,49 @@ def update_bed_status(bed_id):
         success = hms.beds_db.update_bed_status(bed_id, status, patient_id)
         if success:
             return jsonify({'success': True, 'message': 'Bed status updated successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Bed not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/beds/stats', methods=['GET'])
+def get_hospital_bed_stats(hospital_id):
+    """Get bed statistics for a hospital"""
+    try:
+        stats = hms.beds_db.get_bed_statistics_by_hospital(hospital_id)
+        return jsonify({'success': True, 'data': stats})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/hospitals/<hospital_id>/beds/department/<department>', methods=['GET'])
+def get_hospital_beds_by_department(hospital_id, department):
+    """Get beds by department for a hospital"""
+    try:
+        beds = hms.beds_db.get_beds_by_department_and_hospital(department, hospital_id)
+        return jsonify({'success': True, 'data': beds})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/beds/<bed_id>', methods=['GET'])
+def get_bed_details(bed_id):
+    """Get specific bed details"""
+    try:
+        bed = hms.beds_db.get_bed_by_id(bed_id)
+        if bed:
+            return jsonify({'success': True, 'data': bed})
+        else:
+            return jsonify({'success': False, 'error': 'Bed not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/beds/<bed_id>', methods=['PUT'])
+def update_bed_details(bed_id):
+    """Update bed details"""
+    try:
+        data = request.get_json()
+        success = hms.beds_db.update_bed_details(bed_id, data)
+        if success:
+            return jsonify({'success': True, 'message': 'Bed updated successfully'})
         else:
             return jsonify({'success': False, 'error': 'Bed not found'}), 404
     except Exception as e:

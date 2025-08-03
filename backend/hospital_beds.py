@@ -63,6 +63,11 @@ class HospitalBedsDB:
             bed['_id'] = str(bed['_id'])
         return beds
     
+    def get_departments_by_hospital(self, hospital_id):
+        """Get all departments that have beds in a specific hospital"""
+        departments = self.beds_collection.distinct('department', {'hospital_id': hospital_id})
+        return sorted(departments)
+    
     def get_beds_by_department_and_hospital(self, department, hospital_id):
         """Get beds by department and hospital"""
         beds = list(self.beds_collection.find({'department': department, 'hospital_id': hospital_id}))
@@ -111,6 +116,19 @@ class HospitalBedsDB:
         result = self.beds_collection.update_one(
             {'_id': ObjectId(bed_id)},
             {'$set': update_data}
+        )
+        return result.modified_count > 0
+    
+    def update_bed_details(self, bed_id, update_data):
+        """Update bed details (room, type, department, etc.)"""
+        # Remove any fields that shouldn't be updated
+        allowed_fields = ['bed_number', 'room_number', 'department', 'bed_type', 'floor', 'wing', 'status', 'patient_id']
+        filtered_data = {k: v for k, v in update_data.items() if k in allowed_fields}
+        filtered_data['updated_at'] = datetime.utcnow()
+        
+        result = self.beds_collection.update_one(
+            {'_id': ObjectId(bed_id)},
+            {'$set': filtered_data}
         )
         return result.modified_count > 0
     

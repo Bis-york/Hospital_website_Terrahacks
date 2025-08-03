@@ -40,6 +40,7 @@
       color: var(--primary);
       background: linear-gradient(45deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       font-size: 2.8em;
       margin-bottom: 30px;
@@ -492,13 +493,19 @@
   <div class="container">
     <h1>🛏️ Bed Management System</h1>
     
+    <!-- Hospital Selection -->
+    <div class="ward-selector">
+      <h2>🏥 Select Hospital</h2>
+      <select class="ward-dropdown" id="hospital-select">
+        <option value="">Loading hospitals...</option>
+      </select>
+    </div>
+    
     <!-- Ward Selection -->
     <div class="ward-selector">
-      <h2>📍 Select Ward</h2>
+      <h2>📍 Select Department</h2>
       <select class="ward-dropdown" id="ward-select">
-        <option value="emergency">🚨 Emergency Ward</option>
-        <option value="general">🏥 General Ward</option>
-        <option value="icu">🩺 Intensive Care Unit</option>
+        <option value="">Loading departments...</option>
       </select>
     </div>
 
@@ -540,6 +547,7 @@
           <div class="legend-color maintenance"></div>
           <span>Maintenance</span>
         </div>
+        <button class="btn btn-primary" id="add-bed-btn" style="margin-left: auto;">+ Add New Bed</button>
       </div>
 
       <div class="beds-grid" id="beds-grid">
@@ -599,54 +607,12 @@
   </div>
 
   <script>
-    // Sample bed data - in production this would come from API
-    const bedsData = {
-      emergency: [
-        { id: 'E001', room: '101', status: 'occupied', patient: 'John Smith', type: 'monitor', notes: 'Stable condition' },
-        { id: 'E002', room: '101', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'E003', room: '102', status: 'occupied', patient: 'Sarah Johnson', type: 'intensive', notes: 'Critical monitoring' },
-        { id: 'E004', room: '102', status: 'maintenance', patient: null, type: 'standard', notes: 'Equipment repair' },
-        { id: 'E005', room: '103', status: 'available', patient: null, type: 'isolation', notes: '' },
-        { id: 'E006', room: '103', status: 'occupied', patient: 'Mike Davis', type: 'monitor', notes: 'Post-surgery' },
-        { id: 'E007', room: '104', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'E008', room: '104', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'E009', room: '105', status: 'occupied', patient: 'Lisa Brown', type: 'intensive', notes: 'Recovery phase' },
-        { id: 'E010', room: '105', status: 'maintenance', patient: null, type: 'monitor', notes: 'Software update' },
-        { id: 'E011', room: '106', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'E012', room: '106', status: 'occupied', patient: 'Tom Wilson', type: 'isolation', notes: 'Infection control' }
-      ],
-      general: [
-        { id: 'G001', room: '201', status: 'occupied', patient: 'Emma Taylor', type: 'standard', notes: 'Regular checkup' },
-        { id: 'G002', room: '201', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G003', room: '202', status: 'occupied', patient: 'James Miller', type: 'standard', notes: 'Recovery' },
-        { id: 'G004', room: '202', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G005', room: '203', status: 'maintenance', patient: null, type: 'standard', notes: 'Deep cleaning' },
-        { id: 'G006', room: '203', status: 'occupied', patient: 'Anna Garcia', type: 'monitor', notes: 'Observation' },
-        { id: 'G007', room: '204', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G008', room: '204', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G009', room: '205', status: 'occupied', patient: 'David Lee', type: 'standard', notes: 'Rehabilitation' },
-        { id: 'G010', room: '205', status: 'occupied', patient: 'Maria Rodriguez', type: 'standard', notes: 'Post-op care' },
-        { id: 'G011', room: '206', status: 'available', patient: null, type: 'monitor', notes: '' },
-        { id: 'G012', room: '206', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G013', room: '207', status: 'occupied', patient: 'Robert Chen', type: 'standard', notes: 'Extended stay' },
-        { id: 'G014', room: '207', status: 'maintenance', patient: null, type: 'standard', notes: 'Equipment check' },
-        { id: 'G015', room: '208', status: 'available', patient: null, type: 'standard', notes: '' },
-        { id: 'G016', room: '208', status: 'occupied', patient: 'Jennifer White', type: 'monitor', notes: 'Monitoring vitals' }
-      ],
-      icu: [
-        { id: 'I001', room: '301', status: 'occupied', patient: 'Alex Thompson', type: 'intensive', notes: 'Ventilator support' },
-        { id: 'I002', room: '301', status: 'occupied', patient: 'Grace Kim', type: 'intensive', notes: 'Critical condition' },
-        { id: 'I003', room: '302', status: 'available', patient: null, type: 'intensive', notes: '' },
-        { id: 'I004', room: '302', status: 'occupied', patient: 'Carlos Martinez', type: 'intensive', notes: 'Post-surgery ICU' },
-        { id: 'I005', room: '303', status: 'maintenance', patient: null, type: 'intensive', notes: 'Ventilator maintenance' },
-        { id: 'I006', room: '303', status: 'occupied', patient: 'Diana Foster', type: 'intensive', notes: 'Cardiac monitoring' },
-        { id: 'I007', room: '304', status: 'available', patient: null, type: 'intensive', notes: '' },
-        { id: 'I008', room: '304', status: 'occupied', patient: 'Kevin Park', type: 'intensive', notes: 'Neurological care' }
-      ]
-    };
-
-    let currentWard = 'emergency';
+    // Configuration
+    const API_BASE_URL = 'http://localhost:5000/api';
+    let currentHospitalId = null;
+    let currentDepartment = 'emergency';
     let selectedBed = null;
+    let bedsData = [];
 
     // Sidebar functionality
     const menuBtn = document.getElementById('menu-btn');
@@ -671,39 +637,253 @@
       console.log('Bed Management page loaded');
       
       // Event listeners
-      document.getElementById('ward-select').addEventListener('change', handleWardChange);
+      document.getElementById('hospital-select').addEventListener('change', handleHospitalChange);
+      document.getElementById('ward-select').addEventListener('change', handleDepartmentChange);
       document.getElementById('bed-form').addEventListener('submit', handleBedUpdate);
       document.getElementById('cancel-btn').addEventListener('click', closeBedModal);
       document.getElementById('discharge-btn').addEventListener('click', handleDischarge);
+      document.getElementById('add-bed-btn').addEventListener('click', openNewBedModal);
       
-      // Load initial data
-      loadBeds();
-      updateStats();
+      // Initialize
+      initializePage();
     });
 
-    function handleWardChange(e) {
-      currentWard = e.target.value;
-      updateWardName();
+    async function initializePage() {
+      try {
+        // Load hospitals and populate dropdown
+        const hospitals = await fetchHospitals();
+        populateHospitalDropdown(hospitals);
+        
+        if (hospitals.length > 0) {
+          currentHospitalId = hospitals[0]._id;
+          
+          // Load departments for the first hospital
+          const departments = await fetchDepartments(currentHospitalId);
+          await populateDepartmentDropdown(departments);
+          
+          // Load beds and stats
+          await loadBeds();
+          await updateStats();
+        } else {
+          showNotification('No hospitals found. Please create a hospital first.', 'error');
+        }
+      } catch (error) {
+        console.error('Error initializing page:', error);
+        showNotification('Error loading hospital data', 'error');
+      }
+    }
+
+    function populateHospitalDropdown(hospitals) {
+      const hospitalSelect = document.getElementById('hospital-select');
+      hospitalSelect.innerHTML = '';
+      
+      if (hospitals.length === 0) {
+        hospitalSelect.innerHTML = '<option value="">No hospitals available</option>';
+        return;
+      }
+      
+      hospitals.forEach(hospital => {
+        const option = document.createElement('option');
+        option.value = hospital._id;
+        option.textContent = hospital.name;
+        hospitalSelect.appendChild(option);
+      });
+      
+      // Set the first hospital as selected
+      if (hospitals.length > 0) {
+        hospitalSelect.value = hospitals[0]._id;
+      }
+    }
+
+    async function populateDepartmentDropdown(departments) {
+      const wardSelect = document.getElementById('ward-select');
+      wardSelect.innerHTML = '';
+      
+      if (departments.length === 0) {
+        wardSelect.innerHTML = '<option value="all">All Departments</option>';
+        currentDepartment = 'all';
+        updateDepartmentName();
+        return;
+      }
+      
+      // Add "All Departments" option first
+      const allOption = document.createElement('option');
+      allOption.value = 'all';
+      allOption.textContent = '🏥 All Departments';
+      wardSelect.appendChild(allOption);
+      
+      // Add department-specific options
+      departments.forEach(department => {
+        const option = document.createElement('option');
+        option.value = department;
+        option.textContent = getDepartmentDisplayName(department);
+        wardSelect.appendChild(option);
+      });
+      
+      // Set the first available department as selected, or "all" if none
+      if (departments.length > 0) {
+        wardSelect.value = departments[0];
+        currentDepartment = departments[0];
+      } else {
+        wardSelect.value = 'all';
+        currentDepartment = 'all';
+      }
+      updateDepartmentName();
+    }
+
+    function getDepartmentDisplayName(department) {
+      const departmentIcons = {
+        emergency: '🚨 Emergency',
+        general: '🏥 General',
+        icu: '🩺 ICU',
+        cardiology: '❤️ Cardiology',
+        pediatrics: '👶 Pediatrics',
+        surgery: '🔪 Surgery',
+        orthopedics: '🦴 Orthopedics',
+        neurology: '🧠 Neurology',
+        oncology: '🎗️ Oncology',
+        maternity: '👶 Maternity',
+        psychiatry: '🧘 Psychiatry',
+        radiology: '📡 Radiology'
+      };
+      
+      return departmentIcons[department.toLowerCase()] || `🏥 ${department.charAt(0).toUpperCase() + department.slice(1)}`;
+    }
+
+    async function handleHospitalChange(e) {
+      currentHospitalId = e.target.value;
+      if (currentHospitalId) {
+        // Load departments for the selected hospital
+        const departments = await fetchDepartments(currentHospitalId);
+        await populateDepartmentDropdown(departments);
+        
+        // Load beds for the hospital/department
+        await loadBeds();
+        await updateStats();
+      }
+    }
+
+    async function fetchHospitals() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals`);
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        } else {
+          throw new Error(data.error || 'Failed to fetch hospitals');
+        }
+      } catch (error) {
+        console.error('Error fetching hospitals:', error);
+        return [];
+      }
+    }
+
+    async function fetchDepartments(hospitalId) {
+      if (!hospitalId) return [];
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals/${hospitalId}/departments`);
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        } else {
+          throw new Error(data.error || 'Failed to fetch departments');
+        }
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        return [];
+      }
+    }
+
+    async function fetchBeds() {
+      if (!currentHospitalId) return [];
+      
+      try {
+        let url;
+        if (currentDepartment && currentDepartment !== 'all') {
+          url = `${API_BASE_URL}/hospitals/${currentHospitalId}/beds/department/${currentDepartment}`;
+        } else {
+          url = `${API_BASE_URL}/hospitals/${currentHospitalId}/beds`;
+        }
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        } else {
+          throw new Error(data.error || 'Failed to fetch beds');
+        }
+      } catch (error) {
+        console.error('Error fetching beds:', error);
+        showNotification('Error loading beds data', 'error');
+        return [];
+      }
+    }
+
+    async function fetchBedStats() {
+      if (!currentHospitalId) return { total_beds: 0, available_beds: 0, occupied_beds: 0, maintenance_beds: 0 };
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/hospitals/${currentHospitalId}/beds/stats`);
+        const data = await response.json();
+        if (data.success) {
+          return data.data;
+        } else {
+          throw new Error(data.error || 'Failed to fetch bed statistics');
+        }
+      } catch (error) {
+        console.error('Error fetching bed stats:', error);
+        return { total_beds: 0, available_beds: 0, occupied_beds: 0, maintenance_beds: 0 };
+      }
+    }
+
+    function handleDepartmentChange(e) {
+      currentDepartment = e.target.value;
+      updateDepartmentName();
       loadBeds();
       updateStats();
     }
 
-    function updateWardName() {
-      const wardNames = {
-        emergency: 'Emergency Ward',
-        general: 'General Ward',
-        icu: 'Intensive Care Unit'
-      };
-      document.getElementById('current-ward-name').textContent = wardNames[currentWard];
+    function updateDepartmentName() {
+      if (currentDepartment === 'all') {
+        document.getElementById('current-ward-name').textContent = 'All Departments';
+      } else {
+        const departmentNames = {
+          emergency: 'Emergency Ward',
+          general: 'General Ward',
+          icu: 'Intensive Care Unit',
+          cardiology: 'Cardiology Department',
+          pediatrics: 'Pediatrics Department',
+          surgery: 'Surgery Department',
+          orthopedics: 'Orthopedics Department',
+          neurology: 'Neurology Department',
+          oncology: 'Oncology Department',
+          maternity: 'Maternity Ward',
+          psychiatry: 'Psychiatry Department',
+          radiology: 'Radiology Department'
+        };
+        
+        const displayName = departmentNames[currentDepartment] || 
+                          `${currentDepartment.charAt(0).toUpperCase() + currentDepartment.slice(1)} Department`;
+        document.getElementById('current-ward-name').textContent = displayName;
+      }
     }
 
-    function loadBeds() {
+    async function loadBeds() {
+      bedsData = await fetchBeds();
+      displayBeds();
+    }
+
+    function displayBeds() {
       const bedsGrid = document.getElementById('beds-grid');
-      const beds = bedsData[currentWard];
-      
       bedsGrid.innerHTML = '';
       
-      beds.forEach(bed => {
+      if (bedsData.length === 0) {
+        bedsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666; padding: 40px;">No beds found for this department. Create some beds to get started.</p>';
+        return;
+      }
+      
+      bedsData.forEach(bed => {
         const bedElement = createBedElement(bed);
         bedsGrid.appendChild(bedElement);
       });
@@ -715,31 +895,51 @@
       bedDiv.onclick = () => openBedModal(bed);
       
       let content = `
-        <div class="bed-number">${bed.id}</div>
+        <div class="bed-number">${bed.bed_number}</div>
         <div class="bed-status">${bed.status.charAt(0).toUpperCase() + bed.status.slice(1)}</div>
       `;
       
-      if (bed.patient && bed.status === 'occupied') {
-        content += `<div class="patient-name">${bed.patient}</div>`;
+      if (bed.patient_id && bed.status === 'occupied') {
+        content += `<div class="patient-name">Patient: ${bed.patient_id}</div>`;
       }
       
       bedDiv.innerHTML = content;
       return bedDiv;
     }
 
-    function updateStats() {
-      const beds = bedsData[currentWard];
-      const stats = {
-        total: beds.length,
-        available: beds.filter(b => b.status === 'available').length,
-        occupied: beds.filter(b => b.status === 'occupied').length,
-        maintenance: beds.filter(b => b.status === 'maintenance').length
-      };
+    async function updateStats() {
+      const stats = await fetchBedStats();
       
-      document.getElementById('total-beds').textContent = stats.total;
-      document.getElementById('available-beds').textContent = stats.available;
-      document.getElementById('occupied-beds').textContent = stats.occupied;
-      document.getElementById('maintenance-beds').textContent = stats.maintenance;
+      if (currentDepartment === 'all') {
+        // Show hospital-wide stats
+        document.getElementById('total-beds').textContent = stats.total_beds;
+        document.getElementById('available-beds').textContent = stats.available_beds;
+        document.getElementById('occupied-beds').textContent = stats.occupied_beds;
+        document.getElementById('maintenance-beds').textContent = stats.maintenance_beds;
+      } else {
+        // Show department-specific stats
+        const departmentStats = stats.department_stats && stats.department_stats[currentDepartment];
+        if (departmentStats) {
+          document.getElementById('total-beds').textContent = departmentStats.total;
+          document.getElementById('available-beds').textContent = departmentStats.available;
+          document.getElementById('occupied-beds').textContent = departmentStats.occupied;
+          document.getElementById('maintenance-beds').textContent = departmentStats.total - departmentStats.available - departmentStats.occupied;
+        } else {
+          // Fallback to counting current department beds
+          const departmentBeds = bedsData;
+          const departmentCounts = {
+            total: departmentBeds.length,
+            available: departmentBeds.filter(b => b.status === 'available').length,
+            occupied: departmentBeds.filter(b => b.status === 'occupied').length,
+            maintenance: departmentBeds.filter(b => b.status === 'maintenance').length
+          };
+          
+          document.getElementById('total-beds').textContent = departmentCounts.total;
+          document.getElementById('available-beds').textContent = departmentCounts.available;
+          document.getElementById('occupied-beds').textContent = departmentCounts.occupied;
+          document.getElementById('maintenance-beds').textContent = departmentCounts.maintenance;
+        }
+      }
     }
 
     function openBedModal(bed) {
@@ -747,31 +947,72 @@
       const modal = document.getElementById('bed-modal');
       
       // Populate form
-      document.getElementById('bed-number').value = bed.id;
+      document.getElementById('bed-number').value = bed.bed_number;
       document.getElementById('bed-status').value = bed.status;
-      document.getElementById('room-number').value = bed.room;
-      document.getElementById('bed-type').value = bed.type;
-      document.getElementById('patient-name').value = bed.patient || '';
+      document.getElementById('room-number').value = bed.room_number;
+      document.getElementById('bed-type').value = bed.bed_type;
+      document.getElementById('patient-name').value = bed.patient_id || '';
       document.getElementById('notes').value = bed.notes || '';
+      
+      // Make bed number readonly for existing beds
+      document.getElementById('bed-number').readOnly = true;
       
       // Show/hide discharge button
       const dischargeBtn = document.getElementById('discharge-btn');
-      if (bed.status === 'occupied' && bed.patient) {
+      if (bed.status === 'occupied' && bed.patient_id) {
         dischargeBtn.style.display = 'inline-block';
       } else {
         dischargeBtn.style.display = 'none';
       }
       
       // Update modal title
-      document.getElementById('modal-title').textContent = `Bed ${bed.id} - Room ${bed.room}`;
+      document.getElementById('modal-title').textContent = `Bed ${bed.bed_number} - Room ${bed.room_number}`;
       
       // Show patient section only if bed can have patients
       const patientSection = document.getElementById('patient-section');
-      if (document.getElementById('bed-status').value === 'maintenance') {
+      if (bed.status === 'maintenance') {
         patientSection.style.display = 'none';
       } else {
         patientSection.style.display = 'block';
       }
+      
+      modal.style.display = 'block';
+    }
+
+    function openNewBedModal() {
+      if (!currentHospitalId) {
+        showNotification('Please select a hospital first', 'error');
+        return;
+      }
+      
+      if (!currentDepartment || currentDepartment === 'all') {
+        showNotification('Please select a specific department to add a bed', 'error');
+        return;
+      }
+      
+      selectedBed = null; // This indicates we're creating a new bed
+      const modal = document.getElementById('bed-modal');
+      
+      // Clear form
+      document.getElementById('bed-number').value = '';
+      document.getElementById('bed-status').value = 'available';
+      document.getElementById('room-number').value = '';
+      document.getElementById('bed-type').value = 'standard';
+      document.getElementById('patient-name').value = '';
+      document.getElementById('notes').value = '';
+      
+      // Make bed number editable for new beds
+      document.getElementById('bed-number').readOnly = false;
+      
+      // Hide discharge button for new beds
+      document.getElementById('discharge-btn').style.display = 'none';
+      
+      // Update modal title to show department
+      document.getElementById('modal-title').textContent = `Add New Bed - ${getDepartmentDisplayName(currentDepartment)}`;
+      
+      // Show patient section
+      const patientSection = document.getElementById('patient-section');
+      patientSection.style.display = 'block';
       
       modal.style.display = 'block';
     }
@@ -781,21 +1022,30 @@
       selectedBed = null;
     }
 
-    function handleBedUpdate(e) {
+    async function handleBedUpdate(e) {
       e.preventDefault();
       
-      if (!selectedBed) return;
-      
       // Get form values
+      const bedNumber = document.getElementById('bed-number').value.trim();
       const newStatus = document.getElementById('bed-status').value;
-      const newRoom = document.getElementById('room-number').value;
+      const newRoom = document.getElementById('room-number').value.trim();
       const newType = document.getElementById('bed-type').value;
       const newPatient = document.getElementById('patient-name').value.trim();
       const newNotes = document.getElementById('notes').value.trim();
       
       // Validation
+      if (!bedNumber) {
+        alert('Please enter a bed number.');
+        return;
+      }
+      
+      if (!newRoom) {
+        alert('Please enter a room number.');
+        return;
+      }
+      
       if (newStatus === 'occupied' && !newPatient) {
-        alert('Please enter a patient name for occupied beds.');
+        alert('Please enter a patient ID for occupied beds.');
         return;
       }
       
@@ -804,35 +1054,105 @@
         return;
       }
       
-      // Update bed data
-      selectedBed.status = newStatus;
-      selectedBed.room = newRoom;
-      selectedBed.type = newType;
-      selectedBed.patient = newStatus === 'occupied' ? newPatient : null;
-      selectedBed.notes = newNotes;
-      
-      // Refresh display
-      loadBeds();
-      updateStats();
-      closeBedModal();
-      
-      // Show success message
-      showNotification(`Bed ${selectedBed.id} updated successfully!`, 'success');
-    }
-
-    function handleDischarge() {
-      if (!selectedBed || selectedBed.status !== 'occupied') return;
-      
-      if (confirm(`Are you sure you want to discharge ${selectedBed.patient} from bed ${selectedBed.id}?`)) {
-        selectedBed.status = 'available';
-        selectedBed.patient = null;
-        selectedBed.notes = 'Recently discharged - ready for cleaning';
+      try {
+        if (selectedBed) {
+          // Update existing bed
+          const updateData = {
+            bed_number: bedNumber,
+            status: newStatus,
+            room_number: newRoom,
+            bed_type: newType,
+            patient_id: newStatus === 'occupied' ? newPatient : null,
+            notes: newNotes
+          };
+          
+          const response = await fetch(`${API_BASE_URL}/beds/${selectedBed._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            showNotification(`Bed ${bedNumber} updated successfully!`, 'success');
+          } else {
+            throw new Error(data.error || 'Failed to update bed');
+          }
+        } else {
+          // Create new bed
+          const newBedData = {
+            bed_number: bedNumber,
+            room_number: newRoom,
+            department: currentDepartment,
+            bed_type: newType,
+            status: newStatus,
+            patient_id: newStatus === 'occupied' ? newPatient : null,
+            floor: 1, // Default floor
+            wing: 'Main', // Default wing
+            notes: newNotes
+          };
+          
+          const response = await fetch(`${API_BASE_URL}/hospitals/${currentHospitalId}/beds`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newBedData)
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            showNotification(`New bed ${bedNumber} created successfully!`, 'success');
+          } else {
+            throw new Error(data.error || 'Failed to create bed');
+          }
+        }
         
-        loadBeds();
-        updateStats();
+        // Refresh display
+        await loadBeds();
+        await updateStats();
         closeBedModal();
         
-        showNotification(`Patient discharged from bed ${selectedBed.id}`, 'success');
+      } catch (error) {
+        console.error('Error with bed operation:', error);
+        showNotification('Error: ' + error.message, 'error');
+      }
+    }
+
+    async function handleDischarge() {
+      if (!selectedBed || selectedBed.status !== 'occupied') return;
+      
+      if (confirm(`Are you sure you want to discharge patient ${selectedBed.patient_id} from bed ${selectedBed.bed_number}?`)) {
+        try {
+          const updateData = {
+            status: 'available',
+            patient_id: null,
+            notes: 'Recently discharged - ready for cleaning'
+          };
+          
+          const response = await fetch(`${API_BASE_URL}/beds/${selectedBed._id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            await loadBeds();
+            await updateStats();
+            closeBedModal();
+            showNotification(`Patient discharged from bed ${selectedBed.bed_number}`, 'success');
+          } else {
+            throw new Error(data.error || 'Failed to discharge patient');
+          }
+        } catch (error) {
+          console.error('Error discharging patient:', error);
+          showNotification('Error discharging patient: ' + error.message, 'error');
+        }
       }
     }
 
@@ -851,6 +1171,7 @@
         opacity: 0;
         transform: translateX(100%);
         transition: all 0.3s ease;
+        max-width: 400px;
       `;
       
       // Set colors based on type
@@ -874,7 +1195,7 @@
         notification.style.transform = 'translateX(0)';
       }, 100);
       
-      // Remove after 3 seconds
+      // Remove after 4 seconds
       setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transform = 'translateX(100%)';
@@ -883,7 +1204,7 @@
             notification.parentNode.removeChild(notification);
           }
         }, 300);
-      }, 3000);
+      }, 4000);
     }
 
     // Status change handler for the form
