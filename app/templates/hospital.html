@@ -46,59 +46,107 @@
         }
 
         .menu-btn {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 20px;
-            padding: 10px 20px;
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            font-size: 18px;
         }
 
-        /* Sidebar styling */
+        .menu-btn:hover {
+            background: var(--accent);
+        }
+
         .sidebar {
-            height: 100%;
-            width: 0;
+            position: fixed;
+            left: 250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .sidebar-nav {
+            padding: 0;
+            list-style: none;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar-nav a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+
+        .sidebar-nav a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
-            background-color: var(--accent);
-            overflow-x: hidden;
-            transition: 0.3s;
-            padding-top: 60px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
         }
 
-        .sidebar a.button {
+        .overlay.show {
             display: block;
-            margin: 20px;
-            padding: 12px 20px;
-            background-color: var(--highlight);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: background-color 0.3s;
         }
 
-        .sidebar a.button:hover {
-            background-color: #a18acb;
+        .main-content {
+            transition: margin-left 0.3s ease;
         }
 
-        .closebtn {
-            position: absolute;
-            top: 20px;
-            left: 25px;
-            font-size: 30px;
-            cursor: pointer;
-            color: white;
+        .main-content.shifted {
+            margin-left: 250px;
         }
 
-    .card-container {
+        .card-container {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -150,44 +198,72 @@
     </style>
 </head>
 <body>
-    <div class="top-info">
-        <p class="p1">SickKids Hospital</p>
-        <p class="p2">170 Elizabeth St, Toronto, ON M5G 1E8, Canada</p>
-        <p class="p3">Phone: +1 416-813-1500 | Email: info@sickids.ca</p>
-    </div>
+    <!-- Menu Button -->
+    <button class="menu-btn" id="menu-btn">☰</button>
 
-    <button class="menu-btn" onclick="openSidebar()">☰ Menu</button>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>🏥 Hospital System</h2>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="index.html"><i>🏠</i> Dashboard</a></li>
+            <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+            <li><a href="patients.html"><i>👥</i> Patient Management</a></li>
+            <li><a href="staff.html"><i>👨‍⚕️</i> Staff Management</a></li>
+            <li><a href="inventory.html"><i>💊</i> Inventory Management</a></li>
+            <li><a href="hospital.html" class="active"><i>🏥</i> Hospital Info</a></li>
+            <li><a href="drugCheck.html"><i>💊</i> Drug Checker</a></li>
+        </ul>
+    </nav>
 
-    <div id="sidebar" class="sidebar">
-        <span class="closebtn" onclick="closeSidebar()">&times;</span>
-        <a href="drugCheck.html" class="button" target="_blank" rel="noopener">Drug Interaction Checker</a>
-    </div>
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
 
-    <div class="card-container">
-        <!-- Left Card -->
-        <div class="card">
-            <h2>Hospital Capacity</h2>
-            <p><strong>Total Beds:</strong> 250</p>
-            <p><strong>Occupied Beds:</strong> 180</p>
-            <p><strong>Available Beds:</strong> 70</p>
-            <p><strong>Current Patients:</strong> 178</p>
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+        <div class="top-info">
+            <p class="p1">SickKids Hospital</p>
+            <p class="p2">170 Elizabeth St, Toronto, ON M5G 1E8, Canada</p>
+            <p class="p3">Phone: +1 416-813-1500 | Email: info@sickids.ca</p>
         </div>
 
-        <!-- Right Card -->
-        <div class="card">
-            <h2>Additional Info</h2>
-            <p>You can add more hospital-related data, mental wellness services, or links here.</p>
+        <div class="card-container">
+            <!-- Left Card -->
+            <div class="card">
+                <h2>Hospital Capacity</h2>
+                <p><strong>Total Beds:</strong> 250</p>
+                <p><strong>Occupied Beds:</strong> 180</p>
+                <p><strong>Available Beds:</strong> 70</p>
+                <p><strong>Current Patients:</strong> 178</p>
+            </div>
+
+            <!-- Right Card -->
+            <div class="card">
+                <h2>Additional Info</h2>
+                <p>You can add more hospital-related data, mental wellness services, or links here.</p>
+            </div>
         </div>
     </div>
 
     <script>
-        function openSidebar() {
-            document.getElementById("sidebar").style.width = "250px";
-        }
+        // Sidebar functionality
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const mainContent = document.getElementById('main-content');
 
-        function closeSidebar() {
-            document.getElementById("sidebar").style.width = "0";
-        }
+        menuBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+            mainContent.classList.toggle('shifted');
+        });
+
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+            mainContent.classList.remove('shifted');
+        });
     </script>
 </body>
 </html>

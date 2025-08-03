@@ -46,68 +46,106 @@
       font-size: 14px;
     }
 
-    .menu-btn {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      width: 44px;
-      height: 44px;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    .menu-btn.hidden {
-      display: none;
-    }
-
+    /* Sidebar Styles */
     .sidebar {
-      height: 100%;
-      width: 0;
       position: fixed;
+      left: -250px;
       top: 0;
-      left: 0;
-      background-color: var(--accent);
-      overflow-x: hidden;
-      transition: width 0.3s ease;
-      padding-top: 60px;
-      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      transition: left 0.3s ease;
       z-index: 1000;
+      overflow-y: auto;
     }
 
     .sidebar.open {
-      width: 250px;
+      left: 0;
     }
 
-    .sidebar .closebtn {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      font-size: 28px;
-      cursor: pointer;
-      color: white;
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .sidebar a.button {
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a {
       display: block;
-      margin: 20px;
-      padding: 12px 20px;
-      background-color: var(--highlight);
+      padding: 15px 20px;
       color: white;
       text-decoration: none;
-      border-radius: 6px;
-      font-weight: bold;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
 
-    .sidebar a.button:hover {
-      background-color: #a18acb;
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--accent);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.shifted {
+      margin-left: 250px;
     }
 
     .container {
@@ -145,7 +183,6 @@
     }
 
     button {
-      width: 100%;
       padding: 12px;
       margin-top: 16px;
       background: var(--primary);
@@ -155,6 +192,10 @@
       font-size: 1em;
       cursor: pointer;
       transition: background 0.2s ease;
+    }
+
+    #check {
+      width: 100%;
     }
 
     button:hover {
@@ -209,46 +250,70 @@
 </head>
 
 <body>
-  <div class="top-info">
-    <p class="p1">SickKids Hospital</p>
-    <p class="p2">170 Elizabeth St, Toronto, ON M5G 1E8, Canada</p>
-    <p class="p3">Phone: +1 416-813-1500 | Email: info@sickids.ca</p>
-  </div>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menu-btn">☰</button>
 
-  <!-- ✅ Small Top-left Button -->
-  <button class="menu-btn" id="menuButton" onclick="openSidebar()">☰</button>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>🏥 Hospital System</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><i>🏠</i> Dashboard</a></li>
+      <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+      <li><a href="patients.html"><i>👥</i> Patient Management</a></li>
+      <li><a href="staff.html"><i>👨‍⚕️</i> Staff Management</a></li>
+      <li><a href="inventory.html"><i>💊</i> Inventory Management</a></li>
+      <li><a href="hospital.html"><i>🏥</i> Hospital Info</a></li>
+      <li><a href="drugCheck.html" class="active"><i>💊</i> Drug Checker</a></li>
+    </ul>
+  </nav>
 
-  <!-- ✅ Sidebar -->
-  <div id="sidebar" class="sidebar">
-    <span class="closebtn" onclick="closeSidebar()">&times;</span>
-    <a href="drugCheck.html" class="button" target="_blank" rel="noopener">Drug Interaction Checker</a>
-  </div>
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
 
-  <div class="container">
-    <h2>Drug Interaction Checker</h2>
-    <label for="drugs">Enter drug names (comma separated):</label>
-    <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
-    <button onclick="checkInteractions()">Check Interactions</button>
-    <div class="result" id="result"></div>
-    <div class="disclaimer">
-      <strong>Disclaimer:</strong><br>
-      This tool is for informational and educational purposes only.
-      It does not constitute medical advice, diagnosis, or treatment. Always 
-      consult a qualified healthcare professional or pharmacist before making any 
-      decisions about medications.
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+    <div class="top-info">
+      <p class="p1">SickKids Hospital</p>
+      <p class="p2">170 Elizabeth St, Toronto, ON M5G 1E8, Canada</p>
+      <p class="p3">Phone: +1 416-813-1500 | Email: info@sickids.ca</p>
+    </div>
+
+    <div class="container">
+      <h2>Drug Interaction Checker</h2>
+      <label for="drugs">Enter drug names (comma separated):</label>
+      <textarea id="drugs" placeholder="e.g. Aspirin, Ibuprofen, Paracetamol"></textarea>
+      <button id="check" onclick="checkInteractions()">Check Interactions</button>
+      <div class="result" id="result">Please enter at least two drugs</div>
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong><br>
+        This tool is for informational and educational purposes only.
+        It does not constitute medical advice, diagnosis, or treatment. Always 
+        consult a qualified healthcare professional or pharmacist before making any 
+        decisions about medications.
+      </div>
     </div>
   </div>
 
   <script>
-    function openSidebar() {
-      document.getElementById("sidebar").classList.add("open");
-      document.getElementById("menuButton").classList.add("hidden");
-    }
+    // Sidebar functionality
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
 
-    function closeSidebar() {
-      document.getElementById("sidebar").classList.remove("open");
-      document.getElementById("menuButton").classList.remove("hidden");
-    }
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      mainContent.classList.toggle('shifted');
+    });
+
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      mainContent.classList.remove('shifted');
+    });
 
     async function checkInteractions() {
       const input = document.getElementById('drugs').value;

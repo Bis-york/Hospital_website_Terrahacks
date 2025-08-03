@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Inventory Management System</title>
+  <style>
+    :root {
+      --primary: #6a9ac4;      /* Calm Blue */
+      --accent: #9ed5cb;       /* Mint Green */
+      --highlight: #b8a4d4;    /* Soft Purple */
+      --bg-light: #f0f6f6;     /* Light soothing background */
+      --card-bg: #ffffff;
+      --text-dark: #333;
+      --text-muted: #555;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg-light);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(106, 154, 196, 0.15);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      background: linear-gradient(to right, var(--accent), var(--highlight));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--accent);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.shifted {
+      margin-left: 250px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menu-btn">☰</button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>🏥 Hospital System</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><i>🏠</i> Dashboard</a></li>
+      <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+      <li><a href="patients.html"><i>👥</i> Patient Management</a></li>
+      <li><a href="staff.html"><i>👨‍⚕️</i> Staff Management</a></li>
+      <li><a href="inventory.html" class="active"><i>💊</i> Inventory Management</a></li>
+      <li><a href="hospital.html"><i>🏥</i> Hospital Info</a></li>
+      <li><a href="drugCheck.html"><i>💊</i> Drug Checker</a></li>
+    </ul>
+  </nav>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+  <div class="container">
+    <h1>💊 Inventory Management</h1>
+    
+    <div class="top-info">
+      <p class="p1">Hospital Inventory Management System</p>
+      <p class="p2">Manage medical supplies, medications, and equipment</p>
+      <p class="p3">Real-time stock tracking with low stock alerts and expiry monitoring</p>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Inventory Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-items">0</div>
+          <div class="stat-label">Total Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="low-stock-items">0</div>
+          <div class="stat-label">Low Stock</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="expired-items">0</div>
+          <div class="stat-label">Expired Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="expiring-soon">0</div>
+          <div class="stat-label">Expiring Soon</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alerts-section">
+      <h2>Critical Alerts</h2>
+      <div class="alert-container">
+        <div class="alert-panel" id="low-stock-alert">
+          <h3>🔴 Low Stock Items</h3>
+          <div class="alert-list" id="low-stock-list">
+            <!-- Low stock items will be loaded here -->
+          </div>
+        </div>
+        <div class="alert-panel" id="expiry-alert">
+          <h3>⏰ Expiring Soon</h3>
+          <div class="alert-list" id="expiry-list">
+            <!-- Expiring items will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="categories-section">
+      <h2>Inventory Categories</h2>
+      <div class="category-grid">
+        <div class="category-card" data-category="medications">
+          <h3>Medications</h3>
+          <div class="category-count" id="medications-count">0</div>
+        </div>
+        <div class="category-card" data-category="medical_supplies">
+          <h3>Medical Supplies</h3>
+          <div class="category-count" id="supplies-count">0</div>
+        </div>
+        <div class="category-card" data-category="equipment">
+          <h3>Equipment</h3>
+          <div class="category-count" id="equipment-count">0</div>
+        </div>
+        <div class="category-card" data-category="consumables">
+          <h3>Consumables</h3>
+          <div class="category-count" id="consumables-count">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <h2>Inventory Management Actions</h2>
+      <button class="action-btn" id="add-item-btn">Add New Item</button>
+      <button class="action-btn" id="update-stock-btn">Update Stock</button>
+      <button class="action-btn" id="generate-report-btn">Generate Report</button>
+      <button class="action-btn" id="refresh-inventory-btn">Refresh Inventory</button>
+    </div>
+
+    <div class="inventory-section">
+      <h2>Inventory List</h2>
+      <div class="search-controls">
+        <input type="text" id="inventory-search" placeholder="Search items by name, ID, or category...">
+        <select id="category-filter">
+          <option value="">All Categories</option>
+          <option value="medications">Medications</option>
+          <option value="medical_supplies">Medical Supplies</option>
+          <option value="equipment">Equipment</option>
+          <option value="consumables">Consumables</option>
+        </select>
+        <select id="stock-filter">
+          <option value="">All Stock Levels</option>
+          <option value="in_stock">In Stock</option>
+          <option value="low_stock">Low Stock</option>
+          <option value="out_of_stock">Out of Stock</option>
+        </select>
+        <select id="expiry-filter">
+          <option value="">All Items</option>
+          <option value="expiring_soon">Expiring Soon</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      
+      <div class="inventory-grid" id="inventory-grid">
+        <!-- Inventory items will be loaded here dynamically -->
+      </div>
+    </div>
+
+    <!-- Modal for Add Item -->
+    <div class="modal" id="add-item-modal">
+      <div class="modal-content">
+        <h3>Add New Inventory Item</h3>
+        <form id="add-item-form">
+          <div class="form-group">
+            <label for="item-id">Item ID:</label>
+            <input type="text" id="item-id" required>
+          </div>
+          <div class="form-group">
+            <label for="item-name">Item Name:</label>
+            <input type="text" id="item-name" required>
+          </div>
+          <div class="form-group">
+            <label for="category">Category:</label>
+            <select id="category" required>
+              <option value="">Select Category</option>
+              <option value="medications">Medications</option>
+              <option value="medical_supplies">Medical Supplies</option>
+              <option value="equipment">Equipment</option>
+              <option value="consumables">Consumables</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="current-stock">Current Stock:</label>
+            <input type="number" id="current-stock" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="min-stock">Minimum Stock Level:</label>
+            <input type="number" id="min-stock" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="max-stock">Maximum Stock Level:</label>
+            <input type="number" id="max-stock" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="unit">Unit:</label>
+            <input type="text" id="unit" placeholder="e.g., boxes, bottles, pieces" required>
+          </div>
+          <div class="form-group">
+            <label for="cost-per-unit">Cost per Unit:</label>
+            <input type="number" id="cost-per-unit" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label for="supplier">Supplier:</label>
+            <input type="text" id="supplier">
+          </div>
+          <div class="form-group">
+            <label for="expiry-date">Expiry Date:</label>
+            <input type="date" id="expiry-date">
+          </div>
+          <div class="form-actions">
+            <button type="submit">Add Item</button>
+            <button type="button" id="cancel-add-item">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Update Stock -->
+    <div class="modal" id="update-stock-modal">
+      <div class="modal-content">
+        <h3>Update Stock Level</h3>
+        <form id="update-stock-form">
+          <div class="form-group">
+            <label for="stock-item-select">Select Item:</label>
+            <select id="stock-item-select" required>
+              <option value="">Select Item to Update</option>
+              <!-- Items will be loaded here -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="operation-type">Operation:</label>
+            <select id="operation-type" required>
+              <option value="">Select Operation</option>
+              <option value="set">Set Stock Level</option>
+              <option value="add">Add Stock</option>
+              <option value="subtract">Use/Remove Stock</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="stock-notes">Notes:</label>
+            <textarea id="stock-notes" rows="3" placeholder="Optional notes about stock update..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Update Stock</button>
+            <button type="button" id="cancel-update-stock">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Item Details -->
+    <div class="modal" id="item-details-modal">
+      <div class="modal-content">
+        <h3>Item Details</h3>
+        <div id="item-details-content">
+          <!-- Item details will be loaded here -->
+        </div>
+        <div class="item-actions">
+          <button id="edit-item-btn">Edit Item</button>
+          <button id="update-item-stock-btn">Update Stock</button>
+          <button id="close-item-details-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // Sidebar functionality
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
+
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      mainContent.classList.toggle('shifted');
+    });
+
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      mainContent.classList.remove('shifted');
+    });
+
+    // Basic page functionality will be added here
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Inventory Management page loaded');
+      
+      // Initialize page
+      loadInventory();
+      loadLowStockAlerts();
+      loadExpiryAlerts();
+      loadCategoryStats();
+      
+      // Event listeners
+      document.getElementById('add-item-btn').addEventListener('click', showAddItemModal);
+      document.getElementById('update-stock-btn').addEventListener('click', showUpdateStockModal);
+      document.getElementById('generate-report-btn').addEventListener('click', generateInventoryReport);
+      document.getElementById('refresh-inventory-btn').addEventListener('click', loadInventory);
+      document.getElementById('cancel-add-item').addEventListener('click', hideAddItemModal);
+      document.getElementById('cancel-update-stock').addEventListener('click', hideUpdateStockModal);
+      document.getElementById('close-item-details-btn').addEventListener('click', hideItemDetailsModal);
+      document.getElementById('add-item-form').addEventListener('submit', handleAddItemSubmit);
+      document.getElementById('update-stock-form').addEventListener('submit', handleUpdateStockSubmit);
+    });
+
+    function loadInventory() {
+      // Will be implemented with API calls
+      console.log('Loading inventory...');
+    }
+
+    function loadLowStockAlerts() {
+      // Will be implemented with API calls
+      console.log('Loading low stock alerts...');
+    }
+
+    function loadExpiryAlerts() {
+      // Will be implemented with API calls
+      console.log('Loading expiry alerts...');
+    }
+
+    function loadCategoryStats() {
+      // Will be implemented with API calls
+      console.log('Loading category statistics...');
+    }
+
+    function showAddItemModal() {
+      document.getElementById('add-item-modal').style.display = 'block';
+    }
+
+    function hideAddItemModal() {
+      document.getElementById('add-item-modal').style.display = 'none';
+    }
+
+    function showUpdateStockModal() {
+      document.getElementById('update-stock-modal').style.display = 'block';
+    }
+
+    function hideUpdateStockModal() {
+      document.getElementById('update-stock-modal').style.display = 'none';
+    }
+
+    function showItemDetailsModal(itemId) {
+      document.getElementById('item-details-modal').style.display = 'block';
+      // Load item details
+    }
+
+    function hideItemDetailsModal() {
+      document.getElementById('item-details-modal').style.display = 'none';
+    }
+
+    function generateInventoryReport() {
+      // Will be implemented with API calls
+      console.log('Generating inventory report...');
+    }
+
+    function handleAddItemSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting add item form...');
+    }
+
+    function handleUpdateStockSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting stock update...');
+    }
+  </script>
+</body>
+</html>

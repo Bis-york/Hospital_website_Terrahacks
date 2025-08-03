@@ -105,6 +105,108 @@
       background-color: #517fa1;
     }
 
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--accent);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.shifted {
+      margin-left: 250px;
+    }
+
     /* Centered big button section */
     .center-buttons {
       display: flex;
@@ -132,6 +234,30 @@
   </style>
 </head>
 <body>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menu-btn">☰</button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>🏥 Hospital System</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html" class="active"><i>🏠</i> Dashboard</a></li>
+      <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+      <li><a href="patients.html"><i>👥</i> Patient Management</a></li>
+      <li><a href="staff.html"><i>👨‍⚕️</i> Staff Management</a></li>
+      <li><a href="inventory.html"><i>💊</i> Inventory Management</a></li>
+      <li><a href="hospital.html"><i>🏥</i> Hospital Info</a></li>
+      <li><a href="drugCheck.html"><i>💊</i> Drug Checker</a></li>
+    </ul>
+  </nav>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
   <div class="container">
     <h1>MediOrbit</h1>
 
@@ -150,6 +276,24 @@
   </div>
 
   <script>
+    // Sidebar functionality
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
+
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      mainContent.classList.toggle('shifted');
+    });
+
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      mainContent.classList.remove('shifted');
+    });
+
     // Load statistics
     async function loadStats() {
       try {

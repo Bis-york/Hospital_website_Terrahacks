@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Management System</title>
+  <style>
+    :root {
+      --primary: #6a9ac4;      /* Calm Blue */
+      --accent: #9ed5cb;       /* Mint Green */
+      --highlight: #b8a4d4;    /* Soft Purple */
+      --bg-light: #f0f6f6;     /* Light soothing background */
+      --card-bg: #ffffff;
+      --text-dark: #333;
+      --text-muted: #555;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg-light);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(106, 154, 196, 0.15);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      background: linear-gradient(to right, var(--accent), var(--highlight));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--accent);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.shifted {
+      margin-left: 250px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menu-btn">☰</button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>🏥 Hospital System</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><i>🏠</i> Dashboard</a></li>
+      <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+      <li><a href="patients.html" class="active"><i>👥</i> Patient Management</a></li>
+      <li><a href="staff.html"><i>👨‍⚕️</i> Staff Management</a></li>
+      <li><a href="inventory.html"><i>💊</i> Inventory Management</a></li>
+      <li><a href="hospital.html"><i>🏥</i> Hospital Info</a></li>
+      <li><a href="drugCheck.html"><i>💊</i> Drug Checker</a></li>
+    </ul>
+  </nav>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+  <div class="container">
+    <h1>👥 Patient Management</h1>
+    
+    <div class="top-info">
+      <p class="p1">Hospital Patient Management System</p>
+      <p class="p2">Manage patient admissions, records, and discharge</p>
+      <p class="p3">Complete patient registry and medical history tracking</p>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Patient Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-patients">0</div>
+          <div class="stat-label">Total Patients</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="admitted-patients">0</div>
+          <div class="stat-label">Currently Admitted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="discharged-today">0</div>
+          <div class="stat-label">Discharged Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="critical-patients">0</div>
+          <div class="stat-label">Critical Status</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <h2>Patient Management Actions</h2>
+      <button class="action-btn" id="admit-patient-btn">Admit New Patient</button>
+      <button class="action-btn" id="discharge-patient-btn">Discharge Patient</button>
+      <button class="action-btn" id="refresh-patients-btn">Refresh List</button>
+    </div>
+
+    <div class="patients-section">
+      <h2>Patient Registry</h2>
+      <div class="search-controls">
+        <input type="text" id="patient-search" placeholder="Search patients by name, ID, or phone...">
+        <select id="status-filter">
+          <option value="">All Statuses</option>
+          <option value="admitted">Admitted</option>
+          <option value="discharged">Discharged</option>
+          <option value="critical">Critical</option>
+        </select>
+        <select id="department-filter">
+          <option value="">All Departments</option>
+          <option value="emergency">Emergency</option>
+          <option value="icu">ICU</option>
+          <option value="general">General</option>
+          <option value="surgery">Surgery</option>
+        </select>
+      </div>
+      
+      <div class="patient-list" id="patient-list">
+        <!-- Patients will be loaded here dynamically -->
+      </div>
+    </div>
+
+    <!-- Modal for Admit Patient -->
+    <div class="modal" id="admit-modal">
+      <div class="modal-content">
+        <h3>Admit New Patient</h3>
+        <form id="admit-form">
+          <div class="form-group">
+            <label for="patient-id">Patient ID:</label>
+            <input type="text" id="patient-id" required>
+          </div>
+          <div class="form-group">
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" required>
+          </div>
+          <div class="form-group">
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" required>
+          </div>
+          <div class="form-group">
+            <label for="age">Age:</label>
+            <input type="number" id="age" min="0" max="150" required>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender:</label>
+            <select id="gender" required>
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" required>
+          </div>
+          <div class="form-group">
+            <label for="emergency-contact">Emergency Contact:</label>
+            <input type="text" id="emergency-contact" required>
+          </div>
+          <div class="form-group">
+            <label for="admission-reason">Admission Reason:</label>
+            <textarea id="admission-reason" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="assigned-bed">Assigned Bed:</label>
+            <select id="assigned-bed">
+              <option value="">Select Available Bed</option>
+              <!-- Available beds will be loaded here -->
+            </select>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Admit Patient</button>
+            <button type="button" id="cancel-admit">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Patient Details -->
+    <div class="modal" id="patient-details-modal">
+      <div class="modal-content">
+        <h3>Patient Details</h3>
+        <div id="patient-details-content">
+          <!-- Patient details will be loaded here -->
+        </div>
+        <div class="patient-actions">
+          <button id="update-patient-btn">Update Information</button>
+          <button id="discharge-patient-detail-btn">Discharge Patient</button>
+          <button id="close-details-btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Discharge Patient -->
+    <div class="modal" id="discharge-modal">
+      <div class="modal-content">
+        <h3>Discharge Patient</h3>
+        <form id="discharge-form">
+          <div class="form-group">
+            <label for="discharge-patient-select">Select Patient:</label>
+            <select id="discharge-patient-select" required>
+              <option value="">Select Patient to Discharge</option>
+              <!-- Admitted patients will be loaded here -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="discharge-notes">Discharge Notes:</label>
+            <textarea id="discharge-notes" rows="4" placeholder="Enter discharge notes and instructions..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Discharge Patient</button>
+            <button type="button" id="cancel-discharge">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // Sidebar functionality
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
+
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      mainContent.classList.toggle('shifted');
+    });
+
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      mainContent.classList.remove('shifted');
+    });
+
+    // Basic page functionality will be added here
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Patient Management page loaded');
+      
+      // Initialize page
+      loadPatients();
+      loadAvailableBeds();
+      
+      // Event listeners
+      document.getElementById('admit-patient-btn').addEventListener('click', showAdmitModal);
+      document.getElementById('discharge-patient-btn').addEventListener('click', showDischargeModal);
+      document.getElementById('refresh-patients-btn').addEventListener('click', loadPatients);
+      document.getElementById('cancel-admit').addEventListener('click', hideAdmitModal);
+      document.getElementById('cancel-discharge').addEventListener('click', hideDischargeModal);
+      document.getElementById('close-details-btn').addEventListener('click', hideDetailsModal);
+      document.getElementById('admit-form').addEventListener('submit', handleAdmitSubmit);
+      document.getElementById('discharge-form').addEventListener('submit', handleDischargeSubmit);
+    });
+
+    function loadPatients() {
+      // Will be implemented with API calls
+      console.log('Loading patients...');
+    }
+
+    function loadAvailableBeds() {
+      // Will be implemented with API calls
+      console.log('Loading available beds...');
+    }
+
+    function showAdmitModal() {
+      document.getElementById('admit-modal').style.display = 'block';
+    }
+
+    function hideAdmitModal() {
+      document.getElementById('admit-modal').style.display = 'none';
+    }
+
+    function showDischargeModal() {
+      document.getElementById('discharge-modal').style.display = 'block';
+    }
+
+    function hideDischargeModal() {
+      document.getElementById('discharge-modal').style.display = 'none';
+    }
+
+    function showDetailsModal(patientId) {
+      document.getElementById('patient-details-modal').style.display = 'block';
+      // Load patient details
+    }
+
+    function hideDetailsModal() {
+      document.getElementById('patient-details-modal').style.display = 'none';
+    }
+
+    function handleAdmitSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting patient admission...');
+    }
+
+    function handleDischargeSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting patient discharge...');
+    }
+  </script>
+</body>
+</html>

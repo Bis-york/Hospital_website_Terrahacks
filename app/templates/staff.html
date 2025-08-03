@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Management System</title>
+  <style>
+    :root {
+      --primary: #6a9ac4;      /* Calm Blue */
+      --accent: #9ed5cb;       /* Mint Green */
+      --highlight: #b8a4d4;    /* Soft Purple */
+      --bg-light: #f0f6f6;     /* Light soothing background */
+      --card-bg: #ffffff;
+      --text-dark: #333;
+      --text-muted: #555;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg-light);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(106, 154, 196, 0.15);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      background: linear-gradient(to right, var(--accent), var(--highlight));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      left: -250px;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .sidebar-nav {
+      padding: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-nav a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 1001;
+      font-size: 18px;
+    }
+
+    .menu-btn:hover {
+      background: var(--accent);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+
+    .main-content.shifted {
+      margin-left: 250px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu Button -->
+  <button class="menu-btn" id="menu-btn">☰</button>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>🏥 Hospital System</h2>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="index.html"><i>🏠</i> Dashboard</a></li>
+      <li><a href="beds.html"><i>🛏️</i> Bed Management</a></li>
+      <li><a href="patients.html"><i>👥</i> Patient Management</a></li>
+      <li><a href="staff.html" class="active"><i>👨‍⚕️</i> Staff Management</a></li>
+      <li><a href="inventory.html"><i>💊</i> Inventory Management</a></li>
+      <li><a href="hospital.html"><i>🏥</i> Hospital Info</a></li>
+      <li><a href="drugCheck.html"><i>💊</i> Drug Checker</a></li>
+    </ul>
+  </nav>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+  <div class="container">
+    <h1>👨‍⚕️ Staff Management</h1>
+    
+    <div class="top-info">
+      <p class="p1">Hospital Staff Management System</p>
+      <p class="p2">Manage staff directory, schedules, and authentication</p>
+      <p class="p3">Complete staff registry with role-based access control</p>
+    </div>
+
+    <div class="dashboard-section">
+      <h2>Staff Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-staff">0</div>
+          <div class="stat-label">Total Staff</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="active-staff">0</div>
+          <div class="stat-label">Active Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="on-duty-staff">0</div>
+          <div class="stat-label">On Duty</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="off-duty-staff">0</div>
+          <div class="stat-label">Off Duty</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="departments-section">
+      <h2>Department Breakdown</h2>
+      <div class="department-grid">
+        <div class="department-card" data-department="emergency">
+          <h3>Emergency</h3>
+          <div class="department-count" id="emergency-count">0</div>
+        </div>
+        <div class="department-card" data-department="icu">
+          <h3>ICU</h3>
+          <div class="department-count" id="icu-count">0</div>
+        </div>
+        <div class="department-card" data-department="general">
+          <h3>General</h3>
+          <div class="department-count" id="general-count">0</div>
+        </div>
+        <div class="department-card" data-department="surgery">
+          <h3>Surgery</h3>
+          <div class="department-count" id="surgery-count">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-section">
+      <h2>Staff Management Actions</h2>
+      <button class="action-btn" id="add-staff-btn">Add New Staff</button>
+      <button class="action-btn" id="staff-login-btn">Staff Login</button>
+      <button class="action-btn" id="update-schedules-btn">Update Schedules</button>
+      <button class="action-btn" id="refresh-staff-btn">Refresh List</button>
+    </div>
+
+    <div class="staff-section">
+      <h2>Staff Directory</h2>
+      <div class="search-controls">
+        <input type="text" id="staff-search" placeholder="Search staff by name, ID, or role...">
+        <select id="role-filter">
+          <option value="">All Roles</option>
+          <option value="doctor">Doctor</option>
+          <option value="nurse">Nurse</option>
+          <option value="technician">Technician</option>
+          <option value="administrator">Administrator</option>
+          <option value="support">Support Staff</option>
+        </select>
+        <select id="department-filter">
+          <option value="">All Departments</option>
+          <option value="emergency">Emergency</option>
+          <option value="icu">ICU</option>
+          <option value="general">General</option>
+          <option value="surgery">Surgery</option>
+          <option value="administration">Administration</option>
+        </select>
+        <select id="status-filter">
+          <option value="">All Status</option>
+          <option value="active">Active</option>
+          <option value="on_duty">On Duty</option>
+          <option value="off_duty">Off Duty</option>
+          <option value="on_leave">On Leave</option>
+        </select>
+      </div>
+      
+      <div class="staff-grid" id="staff-grid">
+        <!-- Staff cards will be loaded here dynamically -->
+      </div>
+    </div>
+
+    <!-- Modal for Add Staff -->
+    <div class="modal" id="add-staff-modal">
+      <div class="modal-content">
+        <h3>Add New Staff Member</h3>
+        <form id="add-staff-form">
+          <div class="form-group">
+            <label for="staff-id">Staff ID:</label>
+            <input type="text" id="staff-id" required>
+          </div>
+          <div class="form-group">
+            <label for="first-name">First Name:</label>
+            <input type="text" id="first-name" required>
+          </div>
+          <div class="form-group">
+            <label for="last-name">Last Name:</label>
+            <input type="text" id="last-name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" required>
+          </div>
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" required>
+              <option value="">Select Role</option>
+              <option value="doctor">Doctor</option>
+              <option value="nurse">Nurse</option>
+              <option value="technician">Technician</option>
+              <option value="administrator">Administrator</option>
+              <option value="support">Support Staff</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="department">Department:</label>
+            <select id="department" required>
+              <option value="">Select Department</option>
+              <option value="emergency">Emergency</option>
+              <option value="icu">ICU</option>
+              <option value="general">General</option>
+              <option value="surgery">Surgery</option>
+              <option value="administration">Administration</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shift">Shift:</label>
+            <select id="shift" required>
+              <option value="">Select Shift</option>
+              <option value="morning">Morning (6AM - 2PM)</option>
+              <option value="afternoon">Afternoon (2PM - 10PM)</option>
+              <option value="night">Night (10PM - 6AM)</option>
+              <option value="on_call">On Call</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Add Staff Member</button>
+            <button type="button" id="cancel-add-staff">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Staff Login -->
+    <div class="modal" id="login-modal">
+      <div class="modal-content">
+        <h3>Staff Login</h3>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password:</label>
+            <input type="password" id="login-password" required>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Login</button>
+            <button type="button" id="cancel-login">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Update Staff Status -->
+    <div class="modal" id="status-modal">
+      <div class="modal-content">
+        <h3>Update Staff Status</h3>
+        <form id="status-form">
+          <div class="form-group">
+            <label for="status-staff-select">Select Staff Member:</label>
+            <select id="status-staff-select" required>
+              <option value="">Select Staff Member</option>
+              <!-- Staff members will be loaded here -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="new-status">New Status:</label>
+            <select id="new-status" required>
+              <option value="">Select Status</option>
+              <option value="active">Active</option>
+              <option value="on_duty">On Duty</option>
+              <option value="off_duty">Off Duty</option>
+              <option value="on_leave">On Leave</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="status-notes">Notes:</label>
+            <textarea id="status-notes" rows="3" placeholder="Optional notes about status change..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit">Update Status</button>
+            <button type="button" id="cancel-status">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // Sidebar functionality
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const mainContent = document.getElementById('main-content');
+
+    menuBtn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('show');
+      mainContent.classList.toggle('shifted');
+    });
+
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+      mainContent.classList.remove('shifted');
+    });
+
+    // Basic page functionality will be added here
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Staff Management page loaded');
+      
+      // Initialize page
+      loadStaff();
+      loadDepartmentStats();
+      
+      // Event listeners
+      document.getElementById('add-staff-btn').addEventListener('click', showAddStaffModal);
+      document.getElementById('staff-login-btn').addEventListener('click', showLoginModal);
+      document.getElementById('update-schedules-btn').addEventListener('click', showStatusModal);
+      document.getElementById('refresh-staff-btn').addEventListener('click', loadStaff);
+      document.getElementById('cancel-add-staff').addEventListener('click', hideAddStaffModal);
+      document.getElementById('cancel-login').addEventListener('click', hideLoginModal);
+      document.getElementById('cancel-status').addEventListener('click', hideStatusModal);
+      document.getElementById('add-staff-form').addEventListener('submit', handleAddStaffSubmit);
+      document.getElementById('login-form').addEventListener('submit', handleLoginSubmit);
+      document.getElementById('status-form').addEventListener('submit', handleStatusSubmit);
+    });
+
+    function loadStaff() {
+      // Will be implemented with API calls
+      console.log('Loading staff...');
+    }
+
+    function loadDepartmentStats() {
+      // Will be implemented with API calls
+      console.log('Loading department statistics...');
+    }
+
+    function showAddStaffModal() {
+      document.getElementById('add-staff-modal').style.display = 'block';
+    }
+
+    function hideAddStaffModal() {
+      document.getElementById('add-staff-modal').style.display = 'none';
+    }
+
+    function showLoginModal() {
+      document.getElementById('login-modal').style.display = 'block';
+    }
+
+    function hideLoginModal() {
+      document.getElementById('login-modal').style.display = 'none';
+    }
+
+    function showStatusModal() {
+      document.getElementById('status-modal').style.display = 'block';
+    }
+
+    function hideStatusModal() {
+      document.getElementById('status-modal').style.display = 'none';
+    }
+
+    function handleAddStaffSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting add staff form...');
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting login form...');
+    }
+
+    function handleStatusSubmit(e) {
+      e.preventDefault();
+      // Will be implemented with API calls
+      console.log('Submitting status update...');
+    }
+  </script>
+</body>
+</html>
