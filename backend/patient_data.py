@@ -30,6 +30,8 @@ class PatientDataDB:
             'admission_date': patient_data.get('admission_date', datetime.utcnow()),
             'discharge_date': patient_data.get('discharge_date', None),
             'doctor_report': patient_data.get('doctor_report', ''),
+            'incident_report': patient_data.get('incident_report', ''),
+            'medical_history': patient_data.get('medical_history', []),
             'diagnosis': patient_data.get('diagnosis', ''),
             'treatment_plan': patient_data.get('treatment_plan', ''),
             'medications': patient_data.get('medications', []),
